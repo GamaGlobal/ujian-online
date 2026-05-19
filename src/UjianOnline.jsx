@@ -582,7 +582,7 @@ export default function UjianOnline() {
     identitasRef.current = identitas;
   }, [identitas]);
 
-  const STORAGE_KEY = `ujian_submitted_${identitas.nis}`;
+  
 
   // ── Hitung skor ──
   const hitungSkorDariRef = useCallback(() => {
