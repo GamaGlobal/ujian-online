@@ -185,9 +185,7 @@ export default function UjianOnline() {
   useEffect(() => { waktuRef.current     = waktu;     }, [waktu]);
   useEffect(() => { identitasRef.current = identitas; }, [identitas]);
 
-  const STORAGE_KEY = `ujian_submitted_${identitas.nis}`;
-
-  // ── Hitung skor ──
+   // ── Hitung skor ──
   const hitungSkorDariRef = useCallback(() => {
     let benar = 0;
     SOAL.forEach((s, i) => { if (jawabanRef.current[i] === s.kunci) benar++; });
