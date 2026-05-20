@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
-const DURATION = 90 * 60;
+const DURATION = 60 * 60;
 const MAX_PELANGGARAN = 3;
 
 const SOAL = [
@@ -149,7 +149,7 @@ const WARNA_BAGIAN = {
   "Literasi Membaca":     { bg: "#fef9e7", accent: "#d4a017", light: "#fdedc8" },
 };
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/GANTI_DENGAN_URL_DEPLOY_ANDA/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwWikoYpRtQwm4X-84u88MuAZhUKMbrG9Jl0RGtgtt2Yfzj5BkXaK3YMG_WsYFTTTvPdw/exec";
 
 function formatWaktu(secs) {
   const m = Math.floor(secs / 60).toString().padStart(2, "0");
