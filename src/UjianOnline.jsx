@@ -1,8 +1,124 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
-const DURATION = 60 * 60;
+const DURATION_SESI = 60 * 60; // 60 menit per sesi
 const MAX_PELANGGARAN = 3;
 
+// ══════════════════════════════════════
+// SOAL SESI 1: TES POTENSI BELAJAR (TPB)
+// ══════════════════════════════════════
+const SOAL_TPB = [
+  // BAGIAN I: KEMAMPUAN VERBAL
+  { bagian: "Kemampuan Verbal", nomor: 1, soal: "Penulisan partikel dalam kalimat berikut ini yang benar adalah ..", pilihan: ["A. Apa kah aku boleh memakan buahmu?", "B. Murid memasuki ruangan satu persatu", "C. Apa pun yang dia inginkan selalu terpenuhi.", "D. Ada pun penyebab kemacetan itu belum diketahui."], kunci: "C" },
+  { bagian: "Kemampuan Verbal", nomor: 2, soal: "Kata ganti 'itu' pada tulisan bercetak tebal dalam berita John Wick 4 mengacu pada ...", pilihan: ["A. John Wick 4", "B. Clancy Brown", "C. Donnie Yen", "D. Aktor asal Hong Kong"], kunci: "B" },
+  { bagian: "Kemampuan Verbal", nomor: 3, soal: "Penulisan partikel /per/ berikut ini yang tepat adalah ...", pilihan: ["A. Persekian menit", "B. Perahu nelayan", "C. Per akaran tumbuhan", "D. Per satu detik"], kunci: "D" },
+  { bagian: "Kemampuan Verbal", nomor: 4, soal: "WAHANA — Sinonim?", pilihan: ["A. Sarana", "B. Ide", "C. Dunia", "D. Planet"], kunci: "A" },
+  { bagian: "Kemampuan Verbal", nomor: 5, soal: "DOGMA — Sinonim?", pilihan: ["A. Agama", "B. Ideologi", "C. Ajaran", "D. Keyakinan", "E. Kendaraan"], kunci: "C" },
+  { bagian: "Kemampuan Verbal", nomor: 6, soal: "Penulisan kata ganti -nya pada kata bercetak tebal 'musnahnya' dalam teks perubahan iklim mengacu pada ...", pilihan: ["A. pantai berpasir", "B. Nature Climate Change", "C. perubahan iklim", "D. garis tepi pantai", "E. bahan bakar fosil"], kunci: "A" },
+  { bagian: "Kemampuan Verbal", nomor: 7, soal: "Berikut ini pernyataan yang benar mengenai gabungan kata adalah ...", pilihan: ["A. Gabungan kata yang merupakan istilah lazim atau kata majemuk ditulis serangkai.", "B. Gabungan kata yang menimbulkan salah pengertian ditulis menggunakan tanda hubung (-). Contoh: anak-istri pejabat", "C. Gabungan kata ditulis serangkai dengan catatan mendapatkan awalan.", "D. Gabungan kata yang sudah padu tidak perlu ditulis serangkai.", "E. Gabungan kata ditulis terpisah apabila terdiri dari bentuk terikat dan kata dasar."], kunci: "B" },
+  { bagian: "Kemampuan Verbal", nomor: 8, soal: "Manakah pembentukan kata yang tepat dalam kalimat berikut?", pilihan: ["A. Tidak ada yang lebih memesona selain keberhasilan siswa", "B. Penerapan kurikulum baru mempengaruhi kinerja guru", "C. Kita jangan hanya memerhatikan bagaimana guru bekerja", "D. Penggunaan smartphone dapat memer-mudah manusia dalam berkomunikasi.", "E. Apakah semua kurikulum mampu merubah dunia pendidikan?"], kunci: "A" },
+  { bagian: "Kemampuan Verbal", nomor: 9, soal: "Kata ulang bermakna 'paling' terdapat pada kalimat ...", pilihan: ["A. Pemain-pemain sepakbola itu berkumpul di rumahnya.", "B. Mereka berusaha belajar sebaik-baiknya", "C. Ia hanya membaca buku-buku LKS", "D. Dia mendengarkan musik sambil tidur-tiduran", "E. Adi menggebu-gebu ingin masuk perwira."], kunci: "B" },
+  { bagian: "Kemampuan Verbal", nomor: 10, soal: "Penulisan kata depan yang sesuai berdasarkan paragraf tentang pengendara wanita adalah ...", pilihan: ["A. (3) dan (5)", "B. Semuanya benar", "C. (2) dan (4)", "D. Semuanya salah", "E. (1) dan (3)"], kunci: "B" },
+  { bagian: "Kemampuan Verbal", nomor: 11, soal: "Imbuhan pe-an dalam kata pemandian memiliki makna ...", pilihan: ["A. Kegiatan", "B. Alat", "C. Suasana", "D. Tempat", "E. Keadaan"], kunci: "D" },
+  { bagian: "Kemampuan Verbal", nomor: 12, soal: "Tim public relation sedang ... tempat yang akan dijadikan sebagai sasaran kegiatan. Kata berimbuhan yang tepat untuk mengisi titik-titik di atas adalah ...", pilihan: ["A. Mesurvei", "B. Memsurvei", "C. Mensurvei", "D. Menyurvei", "E. Menyurveikan"], kunci: "D" },
+  { bagian: "Kemampuan Verbal", nomor: 13, soal: "AKTUAL — Antonim?", pilihan: ["A. Fiktif", "B. Modern", "C. Sebenarnya", "D. Kadaluarsa", "E. Baru"], kunci: "D" },
+  { bagian: "Kemampuan Verbal", nomor: 14, soal: "DEPENDEN — Antonim?", pilihan: ["A. Interaksi", "B. Korelasi", "C. Animasi", "D. Invalid", "E. Mandiri"], kunci: "E" },
+  { bagian: "Kemampuan Verbal", nomor: 15, soal: "Berikut ini kalimat yang menerapkan kaidah penulisan angka yang tidak tepat adalah ...", pilihan: ["A. Seperempat gajiku selalu aku tabung untuk membeli rumah", "B. Harga parkir motor di Pakuwon Mall adalah Rp5.000,-", "C. Pedagang kaki lima sering ditemukan dengan kawasan simpang 5", "D. Total hadiah yang didapatkan dari lomba karate adalah 10 juta.", "E. Dua belas rumah rusak akibat tanah longsor yang terjadi di Lombok."], kunci: "D" },
+  // BAGIAN II: KEMAMPUAN NUMERIK
+  { bagian: "Kemampuan Numerik", nomor: 16, soal: "Gaza memiliki operasi matematika: 10 + 3 - 7 × 5. Jika Gaza mengacak urutan operasi tersebut, berapakah selisih antara bilangan terbesar dan terkecil yang dapat dihasilkan?", pilihan: ["A. 52", "B. 12", "C. 32", "D. 2"], kunci: "A" },
+  { bagian: "Kemampuan Numerik", nomor: 17, soal: "Jika x = -y dan x ≠ 0, ada berapa pernyataan berikut yang benar? 1) x²y² < 0, 2) (x+y)² = 0, 3) xy < 0", pilihan: ["A. 0", "B. 3", "C. 2", "D. 1"], kunci: "C" },
+  { bagian: "Kemampuan Numerik", nomor: 18, soal: "2 - 20% - 2% - 0,2% - 0,02% = ...", pilihan: ["A. 0,1777", "B. 1,7778", "C. 17,778", "D. 0,1778"], kunci: "B" },
+  { bagian: "Kemampuan Numerik", nomor: 19, soal: "Jika x² + y² = 10 dan xy = 3, maka x + y = ...", pilihan: ["A. 4 atau -4", "B. 4", "C. -4", "D. 0"], kunci: "A" },
+  { bagian: "Kemampuan Numerik", nomor: 20, soal: "Penjumlahan digit terakhir dan digit pertama dari 3^20 adalah ...", pilihan: ["A. 9", "B. 3", "C. 7", "D. 10"], kunci: "C" },
+  { bagian: "Kemampuan Numerik", nomor: 21, soal: "x, 2x, 7, 17, 14, 29, 26, 46, y. Nilai dari x + y adalah ...", pilihan: ["A. 51", "B. 61", "C. 91", "D. 48"], kunci: "B" },
+  { bagian: "Kemampuan Numerik", nomor: 22, soal: "3, 7, 11, 15, ... Suku ke-100 dari barisan tersebut adalah ...", pilihan: ["A. 396", "B. 297", "C. 399", "D. 1188"], kunci: "C" },
+  { bagian: "Kemampuan Numerik", nomor: 23, soal: "4, 5, 7, 10, 11, 13, 16, 17, ...", pilihan: ["A. 20", "B. 19", "C. 18", "D. 21"], kunci: "B" },
+  { bagian: "Kemampuan Numerik", nomor: 24, soal: "3, 4, 7, 2, -5, 4, 15, ...", pilihan: ["A. 2 dan 13", "B. -2 dan -13", "C. -2 dan 13", "D. 2 dan -13"], kunci: "D" },
+  { bagian: "Kemampuan Numerik", nomor: 25, soal: "Toni membeli bakso per porsi Rp9.800 dan menginginkan untung 33%. Berapa harga per porsi yang harus dijual?", pilihan: ["A. 11.024", "B. 10.034", "C. 13.034", "D. 15.024"], kunci: "C" },
+  { bagian: "Kemampuan Numerik", nomor: 26, soal: "c berbanding lurus dengan x. Bila c = 8,4 dan x = 3,6, berapakah nilai c jika x = 3,336?", pilihan: ["A. 7,774", "B. 4,777", "C. 4,874", "D. 7,784"], kunci: "D" },
+  { bagian: "Kemampuan Numerik", nomor: 27, soal: "107% dari 2009 adalah ...", pilihan: ["A. 2491,6", "B. 2149,6", "C. 2419,6", "D. 2194,6"], kunci: "B" },
+  { bagian: "Kemampuan Numerik", nomor: 28, soal: "Pak Tono memiliki lahan 412 ha, membeli lagi 256 ha. 316 ha adalah lahan perkebunan, sisanya pertanian. Jika 12% lahan pertanian rusak, berapakah luas lahan yang rusak?", pilihan: ["A. 2,47 hektar", "B. 0,5 hektar", "C. 0,38 hektar", "D. 3,25 hektar"], kunci: "A" },
+  { bagian: "Kemampuan Numerik", nomor: 29, soal: "Perusahaan memiliki 8 mesin yang mencapai target dalam 1 bulan. Bulan depan harus selesai 20 hari. Berapa mesin yang perlu dibeli lagi?", pilihan: ["A. 8", "B. 4", "C. 2", "D. 12"], kunci: "B" },
+  { bagian: "Kemampuan Numerik", nomor: 30, soal: "Kereta cepat menempuh 3 km dalam 45 detik. Kecepatan dalam km/jam adalah ...", pilihan: ["A. 44", "B. 72", "C. 80", "D. 240"], kunci: "D" },
+  // BAGIAN III: PENALARAN LOGIS DAN ANALITIK
+  { bagian: "Penalaran Logis", nomor: 31, soal: "Semua siswa MAN 5 Bogor rajin belajar. Budi adalah siswa MAN 5 Bogor. Kesimpulan yang tepat adalah ...", pilihan: ["A. Budi mungkin rajin belajar.", "B. Budi pasti rajin belajar.", "C. Budi tidak rajin belajar.", "D. Semua siswa bernama Budi rajin belajar.", "E. Tidak dapat disimpulkan."], kunci: "B" },
+  { bagian: "Penalaran Logis", nomor: 32, soal: "Jika hari ini adalah hari Senin, maka dua hari lagi adalah hari Rabu. Hari ini bukan hari Senin. Kesimpulan yang tepat adalah ...", pilihan: ["A. Dua hari lagi pasti hari Rabu.", "B. Dua hari lagi bukan hari Rabu.", "C. Tidak dapat disimpulkan apakah dua hari lagi Rabu atau bukan.", "D. Hari ini adalah hari Minggu.", "E. Hari ini adalah hari Selasa."], kunci: "C" },
+  { bagian: "Penalaran Logis", nomor: 33, soal: "Di sebuah kelas, semua yang menyukai matematika juga menyukai fisika. Rini menyukai fisika. Kesimpulan yang tepat adalah ...", pilihan: ["A. Rini pasti menyukai matematika.", "B. Rini tidak menyukai matematika.", "C. Rini mungkin menyukai matematika, mungkin tidak.", "D. Semua yang menyukai fisika menyukai matematika.", "E. Fisika dan matematika selalu berhubungan."], kunci: "C" },
+  { bagian: "Penalaran Logis", nomor: 34, soal: "Lima orang (A, B, C, D, E) duduk dalam satu baris. A duduk di sebelah kiri B. C duduk di antara D dan E. B duduk paling kanan. Siapakah yang duduk paling kiri?", pilihan: ["A. A", "B. C", "C. D", "D. E", "E. Tidak dapat ditentukan"], kunci: "E" },
+  { bagian: "Penalaran Logis", nomor: 35, soal: "Jika tidak ada yang berani, maka tidak ada yang sukses. Andi sukses. Kesimpulan yang tepat adalah ...", pilihan: ["A. Andi tidak berani.", "B. Andi pasti berani.", "C. Semua yang sukses berani.", "D. Andi mungkin berani.", "E. Tidak dapat disimpulkan."], kunci: "B" },
+  { bagian: "Penalaran Logis", nomor: 36, soal: "Semua tanaman membutuhkan air. Semua yang membutuhkan air akan layu jika kekeringan. Kesimpulan yang tepat adalah ...", pilihan: ["A. Semua tanaman akan layu jika kekeringan.", "B. Hanya tanaman yang layu jika kekeringan.", "C. Air menyebabkan tanaman layu.", "D. Kekeringan baik untuk tanaman.", "E. Tidak semua tanaman membutuhkan air."], kunci: "A" },
+  { bagian: "Penalaran Logis", nomor: 37, soal: "Perhatikan pola gambar: ○ △ □ ○ △ □ ○ △ ... Bentuk apa yang seharusnya mengisi titik-titik?", pilihan: ["A. ○", "B. △", "C. □", "D. ◇", "E. ★"], kunci: "C" },
+  { bagian: "Penalaran Logis", nomor: 38, soal: "Premis 1: Semua buku memiliki halaman. Premis 2: Novel adalah buku. Manakah kesimpulan yang VALID?", pilihan: ["A. Semua halaman ada di dalam novel.", "B. Novel memiliki halaman.", "C. Buku selalu berisi cerita.", "D. Halaman adalah bagian dari buku saja.", "E. Novel adalah satu-satunya buku."], kunci: "B" },
+  { bagian: "Penalaran Logis", nomor: 39, soal: "Kotak A berisi apel atau mangga. Kotak B berisi mangga. Kotak C berisi jeruk. Jika Kotak B dan C digabung, hasilnya berisi ...", pilihan: ["A. Apel dan mangga", "B. Mangga dan jeruk", "C. Apel dan jeruk", "D. Apel, mangga, dan jeruk", "E. Jeruk saja"], kunci: "B" },
+  { bagian: "Penalaran Logis", nomor: 40, soal: "Ani lebih tinggi dari Budi, dan Budi lebih tinggi dari Citra, maka ...", pilihan: ["A. Citra lebih tinggi dari Ani.", "B. Budi paling tinggi.", "C. Ani paling tinggi di antara ketiganya.", "D. Citra dan Ani sama tinggi.", "E. Urutan tidak dapat ditentukan."], kunci: "C" },
+  { bagian: "Penalaran Logis", nomor: 41, soal: "Manakah pernyataan yang PASTI BENAR jika: 'Beberapa siswa rajin, dan semua siswa rajin mendapat beasiswa'?", pilihan: ["A. Semua siswa mendapat beasiswa.", "B. Beberapa siswa mendapat beasiswa.", "C. Siswa yang tidak rajin tidak mendapat beasiswa.", "D. Semua siswa yang mendapat beasiswa adalah rajin.", "E. Tidak ada siswa yang mendapat beasiswa."], kunci: "B" },
+  { bagian: "Penalaran Logis", nomor: 42, soal: "Tim X bermain 5 kali: menang 3 kali (3 poin), seri 1 kali (1 poin), kalah 1 kali (0 poin). Berapa total poin tim X?", pilihan: ["A. 8", "B. 9", "C. 10", "D. 11", "E. 12"], kunci: "C" },
+  { bagian: "Penalaran Logis", nomor: 43, soal: "P lebih besar dari Q. R lebih kecil dari Q. S sama dengan P. Urutan dari terbesar ke terkecil adalah ...", pilihan: ["A. P, Q, R, S", "B. S, P, Q, R", "C. P = S > Q > R", "D. Q > P = S > R", "E. R > Q > P = S"], kunci: "C" },
+  { bagian: "Penalaran Logis", nomor: 44, soal: "Alif membeli makanan paling dahulu. Bela mengantre setelah Caca. Doni mengantre sebelum Caca. Bagaimana urutan antrean yang sebenarnya?", pilihan: ["A. Alif, Doni, Bela, Caca", "B. Alif, Bela, Caca, Doni", "C. Alif, Caca, Bela, Doni", "D. Alif, Doni, Caca, Bela"], kunci: "D" },
+  { bagian: "Penalaran Logis", nomor: 45, soal: "Umi duduk di sebelah kiri Vina. Vina duduk di belakang Yuli. Siapakah yang duduk di kiri pada baris depan roller coaster?", pilihan: ["A. Vina", "B. Wulan", "C. Tidak dapat dipastikan", "D. Yuli"], kunci: "D" },
+  // BAGIAN IV: KEPRIBADIAN DAN MINAT BAKAT (15 soal — tidak ada benar/salah)
+  { bagian: "Kepribadian & Minat Bakat", nomor: 46, soal: "Ketika menghadapi tugas kelompok yang sulit, apa yang biasanya kamu lakukan?", pilihan: ["A. Menunggu teman lain memulai agar bisa mengikuti arahannya.", "B. Langsung membagi tugas dan memimpin kelompok agar efisien.", "C. Mengerjakan bagian sendiri tanpa berdiskusi dengan yang lain.", "D. Menyerahkan semua pekerjaan kepada teman yang paling pintar.", "E. Meminta guru menyelesaikan masalah kelompok."] },
+  { bagian: "Kepribadian & Minat Bakat", nomor: 47, soal: "Saat kamu mendapat nilai ujian yang buruk, reaksi pertamamu adalah ...", pilihan: ["A. Menyalahkan guru karena soal terlalu sulit.", "B. Tidak peduli dan berharap nilai berikutnya lebih baik.", "C. Menganalisis kesalahanmu dan membuat rencana perbaikan.", "D. Mencontek pada ujian berikutnya agar nilainya bagus.", "E. Menyerah dan menganggap diri tidak mampu."] },
+  { bagian: "Kepribadian & Minat Bakat", nomor: 48, soal: "Temanmu menunjukkan cara menyelesaikan soal matematika yang berbeda dari caramu, padahal keduanya benar. Sikapmu adalah ...", pilihan: ["A. Mempertahankan cara sendiri dan mengabaikan cara temanmu.", "B. Mengatakan cara temanmu salah meskipun jawabannya benar.", "C. Mempelajari cara temanmu dan menggabungkan dengan pemahamanmu.", "D. Langsung meniru cara temanmu tanpa memahaminya.", "E. Merasa cemburu karena cara temanmu lebih efisien."] },
+  { bagian: "Kepribadian & Minat Bakat", nomor: 49, soal: "Kamu diminta mewakili sekolah dalam lomba debat, tetapi kurang percaya diri. Apa yang akan kamu lakukan?", pilihan: ["A. Menolak karena takut kalah dan mempermalukan sekolah.", "B. Menerima dengan semangat dan berlatih keras.", "C. Menerima tapi tidak belajar sama sekali karena yakin menang.", "D. Meminta teman lain menggantikanmu.", "E. Berpura-pura sakit agar tidak perlu mengikutinya."] },
+  { bagian: "Kepribadian & Minat Bakat", nomor: 50, soal: "Ketika ada teman yang sedang kesulitan memahami pelajaran, kamu akan ...", pilihan: ["A. Pura-pura tidak tahu agar tidak perlu membantunya.", "B. Membantu menjelaskan sampai ia mengerti.", "C. Memberinya contekan saat ujian agar cepat selesai.", "D. Menyuruhnya bertanya ke guru saja.", "E. Merasa senang karena nilaimu bisa lebih tinggi dari temanmu."] },
+  { bagian: "Kepribadian & Minat Bakat", nomor: 51, soal: "Bagaimana kamu mengatur waktu belajar selama di asrama?", pilihan: ["A. Belajar hanya saat menjelang ujian saja.", "B. Belajar sesuka hati tanpa jadwal yang jelas.", "C. Membuat jadwal belajar rutin dan mengikutinya dengan disiplin.", "D. Belajar hanya jika ada teman yang mengajak.", "E. Tidak belajar karena menganggap diri sudah cukup pintar."] },
+  { bagian: "Kepribadian & Minat Bakat", nomor: 52, soal: "Jika kamu menemukan dompet berisi uang di lingkungan sekolah, apa yang akan kamu lakukan?", pilihan: ["A. Mengambil uangnya dan membuang dompetnya.", "B. Menyimpannya karena tidak ada yang melihat.", "C. Menyerahkan kepada guru atau petugas sekolah.", "D. Menunggu pemiliknya datang tanpa melakukan apa-apa.", "E. Memberikannya kepada teman untuk dibagi bersama."] },
+  { bagian: "Kepribadian & Minat Bakat", nomor: 53, soal: "Kamu tidak setuju dengan keputusan yang diambil oleh ketua kelas. Apa yang akan kamu lakukan?", pilihan: ["A. Diam-diam tidak mematuhi keputusan tersebut.", "B. Menyampaikan pendapat secara santun dan konstruktif di forum diskusi.", "C. Menghasut teman-teman lain untuk menolak keputusan tersebut.", "D. Marah-marah di depan kelas.", "E. Keluar dari kelas karena tidak sepakat."] },
+  { bagian: "Kepribadian & Minat Bakat", nomor: 54, soal: "Setelah masuk MAN IC, jadwal harian sangat padat: shalat berjamaah, belajar, ekstrakurikuler, dan mengaji. Bagaimana sikapmu?", pilihan: ["A. Mengeluh terus-menerus kepada orang tua agar dipindahkan.", "B. Hanya mengikuti kegiatan yang kamu sukai.", "C. Mengikuti semua kegiatan dengan penuh tanggung jawab dan adaptif.", "D. Menghindari kegiatan yang dianggap melelahkan.", "E. Tidur saat kegiatan berlangsung agar tetap segar."] },
+  { bagian: "Kepribadian & Minat Bakat", nomor: 55, soal: "Saat kamu berhasil meraih prestasi, reaksimu adalah ...", pilihan: ["A. Menyombongkan diri kepada teman-teman.", "B. Bersyukur dan menjadikannya motivasi untuk terus berkembang.", "C. Merasa sudah cukup dan berhenti berusaha.", "D. Merendahkan teman yang tidak berprestasi.", "E. Menyembunyikan prestasi karena takut diiri."] },
+  { bagian: "Kepribadian & Minat Bakat", nomor: 56, soal: "Bagaimana perasaanmu jika harus tinggal jauh dari orang tua di asrama?", pilihan: ["A. Sangat tidak mau dan akan pulang tanpa izin.", "B. Sedih tapi siap karena ini demi masa depan yang lebih baik.", "C. Tidak peduli sama sekali.", "D. Takut dan tidak bisa mandiri.", "E. Menyesal mendaftar ke MAN IC."] },
+  { bagian: "Kepribadian & Minat Bakat", nomor: 57, soal: "Dalam kegiatan diskusi kelompok, kamu lebih suka ...", pilihan: ["A. Diam dan membiarkan orang lain berbicara.", "B. Mendominasi pembicaraan tanpa memberi kesempatan orang lain.", "C. Aktif berbicara, mendengarkan, dan merangkum pendapat bersama.", "D. Keluar dari diskusi jika pendapatmu tidak disetujui.", "E. Hanya setuju dengan semua pendapat agar cepat selesai."] },
+  { bagian: "Kepribadian & Minat Bakat", nomor: 58, soal: "Kamu melihat teman satu kamar asrama membuang sampah sembarangan. Kamu akan ...", pilihan: ["A. Pura-pura tidak melihat.", "B. Ikut membuang sampah sembarangan karena teman melakukannya.", "C. Mengingatkan dengan cara yang baik dan mencontohkan membuang sampah di tempatnya.", "D. Melaporkan langsung ke kepala asrama tanpa menegurnya terlebih dahulu.", "E. Membersihkan sampahnya diam-diam tanpa menegur."] },
+  { bagian: "Kepribadian & Minat Bakat", nomor: 59, soal: "Kamu mendapat tugas membaca satu buku tebal dalam seminggu. Cara terbaik yang kamu lakukan adalah ...", pilihan: ["A. Membaca semuanya di hari terakhir sebelum deadline.", "B. Membagi jumlah halaman per hari dan membaca rutin setiap hari.", "C. Hanya membaca bagian kesimpulan saja.", "D. Meminta teman merangkumkan untuk kamu.", "E. Tidak membaca dan mengarang saja saat ditanya."] },
+  { bagian: "Kepribadian & Minat Bakat", nomor: 60, soal: "Motivasi utamamu mendaftar ke MAN 5 Bogor adalah ...", pilihan: ["A. Karena dipaksa orang tua.", "B. Agar terlihat keren di mata teman-teman.", "C. Karena ingin mendapatkan pendidikan berkualitas yang mengintegrasikan IPTEK dan nilai Islam.", "D. Karena tidak ada pilihan sekolah lain.", "E. Karena ingin jauh dari orang tua."] },
+
+  // BAGIAN V: MINAT BAKAT (40 soal — tidak ada benar/salah, profil dominan)
+  // A=Investigatif, B=Sosial, C=Artistik, D=Teknis, E=Kinestetik
+  { bagian: "Minat Bakat", nomor: 1, soal: "Ketika mempelajari konsep yang sangat kompleks, pendekatan yang paling kamu sukai adalah...", pilihan: ["A. Membaca referensi mendalam dan menganalisis teorinya", "B. Mendiskusikan dengan orang lain", "C. Mengubahnya menjadi bentuk Visual/karya", "D. Mencoba eksperimen teknis", "E. Mempraktikkan langsung"] },
+  { bagian: "Minat Bakat", nomor: 2, soal: "Jika diberi proyek sekolah besar, kamu paling tertarik mengerjakan...", pilihan: ["A. Analisis data & laporan", "B. Koordinasi tim", "C. Desain visual", "D. Perancangan teknis", "E. Implementasi lapangan"] },
+  { bagian: "Minat Bakat", nomor: 3, soal: "Saat menghadapi masalah sulit..", pilihan: ["A. Menguraikan logika", "B. Bertanya pada orang", "C. Mencari ide kreatif", "D. Trial & error", "E. Bertindak cepat"] },
+  { bagian: "Minat Bakat", nomor: 4, soal: "Topik yang paling menarik perhatianmu...", pilihan: ["A. Ilmu pengetahuan", "B. Interaksi manusia", "C. Seni & warna", "D. Mesin", "E. Aktivitas fisik"] },
+  { bagian: "Minat Bakat", nomor: 5, soal: "Keberhasilan paling membanggakan bagimu...", pilihan: ["A. Prestasi akademik", "B. Pengakuan sosial", "C. Apresiasi karya", "D. Alat berhasil dibuat", "E. Juara olahraga"] },
+  { bagian: "Minat Bakat", nomor: 6, soal: "Dalam kerja kelompok kamu biasanya...", pilihan: ["A. Dokumentasi", "B. Pemimpin diskusi", "C. Desainer ide", "D. Teknisi", "E. Pelaksana"] },
+  { bagian: "Minat Bakat", nomor: 7, soal: "Waktu luang kamu lebih sering...", pilihan: ["A. Membaca", "B. Bersosialisasi", "C. Berkarya", "D. Eksperimen", "E. Olahraga"] },
+  { bagian: "Minat Bakat", nomor: 8, soal: "Orang lain melihatmu sebagai...", pilihan: ["A. Analitis", "B. Ramah", "C. Imajinatif", "D. Teknis", "E. Enerjik"] },
+  { bagian: "Minat Bakat", nomor: 9, soal: "Pelajaran favoritmu..", pilihan: ["A. Matematika", "B. Sosiologi", "C. Seni", "D. Fisika", "E. PJOK"] },
+  { bagian: "Minat Bakat", nomor: 10, soal: "Pekerjaan impian..", pilihan: ["A. Peneliti", "B. Konselor", "C. Seniman", "D. Engineer", "E. Atlet"] },
+  { bagian: "Minat Bakat", nomor: 11, soal: "Saat memahami sistem baru...", pilihan: ["A. Analisis konsep", "B. Diskusi", "C. Visualisasi", "D. Simulasi alat", "E. Praktik"] },
+  { bagian: "Minat Bakat", nomor: 12, soal: "Jika ikut lomba...", pilihan: ["A. Olimpiade sains", "B. Debat", "C. Desain", "D. Robotik", "E. Atletik"] },
+  { bagian: "Minat Bakat", nomor: 13, soal: "Tugas paling kamu nikmati...", pilihan: ["A. Konseptual", "B. Interaktif", "C. Ekspresif", "D. Mekanis", "E. Fisik"] },
+  { bagian: "Minat Bakat", nomor: 14, soal: "Jika mengajari teman...", pilihan: ["A. Jelaskan teori", "B. Tanya jawab", "C. Gambar ilustrasi", "D. Demonstrasi", "E. Praktik"] },
+  { bagian: "Minat Bakat", nomor: 15, soal: "Ekstrakurikuler pilihan...", pilihan: ["A. Klub sains", "B. Organisasi", "C. Seni", "D. Teknologi", "E. Olahraga"] },
+  { bagian: "Minat Bakat", nomor: 16, soal: "Saat membaca informasi..", pilihan: ["A. Analisis detail", "B. Bahas bersama", "C. Visualisasikan", "D. Uji teknis", "E. Terapkan"] },
+  { bagian: "Minat Bakat", nomor: 17, soal: "Saat membuat proyek...", pilihan: ["A. Riset", "B. Kolaborasi", "C. Estetika", "D. Fungsi teknis", "E. Eksekusi"] },
+  { bagian: "Minat Bakat", nomor: 18, soal: "Motivasi belajar terbesar...", pilihan: ["A. Pengetahuan", "B. Relasi", "C. Ekspresi", "D. Inovasi", "E. Tantangan fisik"] },
+  { bagian: "Minat Bakat", nomor: 19, soal: "Cara mengatasi stres...", pilihan: ["A. Membaca", "B. Curhat", "C. Berkarya", "D. Merakit", "E. Olahraga"] },
+  { bagian: "Minat Bakat", nomor: 20, soal: "Lingkungan favorit...", pilihan: ["A. Perpustakaan", "B. Komunitas", "C. Studio seni", "D. Lab", "E. Lapangan"] },
+  { bagian: "Minat Bakat", nomor: 21, soal: "Saat menghadapi tantangan..", pilihan: ["A. Strategi logis", "B. Dukungan sosial", "C. Kreativitas", "D. Eksperimen", "E. Aksi"] },
+  { bagian: "Minat Bakat", nomor: 22, soal: "Peran saat presentasi...", pilihan: ["A. Penyusun materi", "B. Pembicara", "C. Desain slide", "D. Demo alat", "E. Simulasi"] },
+  { bagian: "Minat Bakat", nomor: 23, soal: "Kegiatan menyenangkan...", pilihan: ["A. Analisis", "B. Diskusi", "C. Menggambar", "D. Membongkar alat", "E. Bergerak"] },
+  { bagian: "Minat Bakat", nomor: 24, soal: "Jika punya ide...", pilihan: ["A. Tulis konsep", "B. Bahas", "C. Visualkan", "D. Prototipe", "E. Uji"] },
+  { bagian: "Minat Bakat", nomor: 25, soal: "Cara belajar favorit..", pilihan: ["A. Buku", "B. Kelompok", "C. Visual", "D. Praktikum", "E. Aktivitas"] },
+  { bagian: "Minat Bakat", nomor: 26, soal: "Tujuan utama belajar...", pilihan: ["A. Pengetahuan", "B. Relasi", "C. Kreativitas", "D. Teknologi", "E. Kebugaran"] },
+  { bagian: "Minat Bakat", nomor: 27, soal: "Jika memimpin proyek...", pilihan: ["A. Strategi", "B. Motivasi tim", "C. Konsep desain", "D. Sistem teknis", "E. Eksekusi"] },
+  { bagian: "Minat Bakat", nomor: 28, soal: "Hal yang membuat penasaran...", pilihan: ["A. Teori", "B. Perilaku manusia", "C. Estetika", "D. Mekanik", "E. Performa tubuh"] },
+  { bagian: "Minat Bakat", nomor: 29, soal: "Media ekspresi diri...", pilihan: ["A. Tulisan ilmiah", "B. Percakapan", "C. Seni", "D. Rekayasa", "E. Gerak"] },
+  { bagian: "Minat Bakat", nomor: 30, soal: "Aktivitas akhir pekan...", pilihan: ["A. Membaca", "B. Nongkrong", "C. Berkarya", "D. Eksperimen", "E. Olahraga"] },
+  { bagian: "Minat Bakat", nomor: 31, soal: "Jika menghadapi konflik...", pilihan: ["A. Analisis", "B. Mediasi", "C. Ide kreatif", "D. Uji solusi", "E. Aksi"] },
+  { bagian: "Minat Bakat", nomor: 32, soal: "Kamu bangga jika...", pilihan: ["A. Nilai tinggi", "B. Banyak teman", "C. Karya dipuji", "D. Alat berhasil", "E. Menang lomba"] },
+  { bagian: "Minat Bakat", nomor: 33, soal: "Saat berpikir...", pilihan: ["A. Logis", "B. Sosial", "C. Imajinatif", "D. Teknis", "E. Praktis"] },
+  { bagian: "Minat Bakat", nomor: 34, soal: "Lingkungan kerja ideal...", pilihan: ["A. Akademik", "B. Sosial", "C. Artistik", "D. Teknologi", "E. Aktif"] },
+  { bagian: "Minat Bakat", nomor: 35, soal: "Jika diberi dana proyek...", pilihan: ["A. Riset", "B. Event sosial", "C. Seni", "D. Alat", "E. Pelatihan fisik"] },
+  { bagian: "Minat Bakat", nomor: 36, soal: "Saat melihat masalah dunia...", pilihan: ["A. Analisis ilmiah", "B. Dampak sosial", "C. Solusi kreatif", "D. Teknologi", "E. Aksi nyata"] },
+  { bagian: "Minat Bakat", nomor: 37, soal: "Bentuk kontribusi favorit...", pilihan: ["A. Ide", "B. Hubungan", "C. Desain", "D. Sistem", "E. Tenaga"] },
+  { bagian: "Minat Bakat", nomor: 38, soal: "Saat belajar cepat...", pilihan: ["A. Membaca", "B. Diskusi", "C. Visual", "D. Praktikum", "E. Praktik"] },
+  { bagian: "Minat Bakat", nomor: 39, soal: "Nilai penting bagimu..", pilihan: ["A. Logika", "B. Empati", "C. Ekspresi", "D. Inovasi", "E. Ketahanan"] },
+  { bagian: "Minat Bakat", nomor: 40, soal: "Masa depan impian...", pilihan: ["A. Akademisi", "B. Sosial", "C. Kreatif", "D. Teknologi", "E. Atletik"] },
+];
+
+// ══════════════════════════════════════
+// SOAL SESI 2: TES POTENSI AKADEMIK (TPA)
+// ══════════════════════════════════════
 const SOAL = [
   { bagian: "Penalaran Matematika", nomor: 1, soal: "Ikram membuat spageti panggang lumer dengan perbandingan massa spageti : adonan saus tomat : keju lumer = 4 : 4 : 2. Jika total massa spageti panggang lumer adalah 2.270 gram, berapakah total massa saus tomat dan keju lumer? (dalam gram)", pilihan: ["A. 1.336", "B. 2.337", "C. 1.337", "D. 2.227"], kunci: "A" },
   { bagian: "Penalaran Matematika", nomor: 2, soal: "Seorang tukang jahit mampu menjahit 60 potong kaos dalam 3 hari. Bila ia bekerja selama 2 minggu, berapa potong kaos yang dapat ia kerjakan?", pilihan: ["A. 210 potong", "B. 140 potong", "C. 280 potong", "D. 350 potong"], kunci: "C" },
@@ -142,14 +258,23 @@ const SOAL = [
   },
 ];
 
-const BAGIAN_LIST = ["Penalaran Matematika", "Literasi Keislaman", "Literasi Membaca"];
+const BAGIAN_LIST_TPB = ["Kemampuan Verbal", "Kemampuan Numerik", "Penalaran Logis", "Kepribadian & Minat Bakat", "Minat Bakat"];
+const BAGIAN_LIST_TPA = ["Penalaran Matematika", "Literasi Keislaman", "Literasi Membaca"];
+
 const WARNA_BAGIAN = {
-  "Penalaran Matematika": { bg: "#e8f4fd", accent: "#2980b9", light: "#d0e8f8" },
-  "Literasi Keislaman":   { bg: "#eafaf1", accent: "#27ae60", light: "#c8f0d8" },
-  "Literasi Membaca":     { bg: "#fef9e7", accent: "#d4a017", light: "#fdedc8" },
+  "Kemampuan Verbal":        { bg: "#e8f4fd", accent: "#2980b9", light: "#d0e8f8" },
+  "Kemampuan Numerik":       { bg: "#fef9e7", accent: "#d4a017", light: "#fdedc8" },
+  "Penalaran Logis":         { bg: "#f3e5f5", accent: "#8e44ad", light: "#e1bee7" },
+  "Kepribadian & Minat Bakat": { bg: "#e8f5e9", accent: "#27ae60", light: "#c8f0d8" },
+  "Penalaran Matematika":    { bg: "#e8f4fd", accent: "#2980b9", light: "#d0e8f8" },
+  "Literasi Keislaman":      { bg: "#eafaf1", accent: "#27ae60", light: "#c8f0d8" },
+  "Literasi Membaca":        { bg: "#fef9e7", accent: "#d4a017", light: "#fdedc8" },
 };
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwWikoYpRtQwm4X-84u88MuAZhUKMbrG9Jl0RGtgtt2Yfzj5BkXaK3YMG_WsYFTTTvPdw/exec";
+const GOOGLE_SCRIPT_URL_TPB =
+  "https://script.google.com/macros/s/AKfycby_mf_BMMo0dInHwCDN-64mVSjvie9L-_uNKDt-8m1dVtBbFHGaVH_cuy1B-vHNoEarOA/exec";
+const GOOGLE_SCRIPT_URL_TPA =
+  "https://script.google.com/macros/s/AKfycby_mf_BMMo0dInHwCDN-64mVSjvie9L-_uNKDt-8m1dVtBbFHGaVH_cuy1B-vHNoEarOA/exec";
 
 function formatWaktu(secs) {
   const m = Math.floor(secs / 60).toString().padStart(2, "0");
@@ -157,147 +282,220 @@ function formatWaktu(secs) {
   return `${m}:${s}`;
 }
 
+// Bagian yang tidak dihitung benar/salah
+const BAGIAN_TANPA_KUNCI = ["Kepribadian & Minat Bakat", "Minat Bakat"];
+
+function hitungSkor(soalList, jawabanObj) {
+  // Hitung total (exclude bagian tanpa kunci)
+  const soalDinilai = soalList.filter((s) => !BAGIAN_TANPA_KUNCI.includes(s.bagian));
+  let benar = 0;
+  soalDinilai.forEach((s, _) => {
+    const gi = soalList.indexOf(s);
+    if (jawabanObj[gi] === s.kunci) benar++;
+  });
+  return {
+    benar,
+    total: soalDinilai.length,
+    persen: soalDinilai.length > 0 ? Math.round((benar / soalDinilai.length) * 100) : 0,
+  };
+}
+
+function hitungSkorPerBagian(soalList, jawabanObj) {
+  const bagianMap = {};
+  soalList.forEach((s, i) => {
+    if (!bagianMap[s.bagian]) bagianMap[s.bagian] = { soal: [], idx: [] };
+    bagianMap[s.bagian].soal.push(s);
+    bagianMap[s.bagian].idx.push(i);
+  });
+  const result = {};
+  Object.entries(bagianMap).forEach(([bagian, data]) => {
+    if (BAGIAN_TANPA_KUNCI.includes(bagian)) {
+      const dijawab = data.idx.filter((i) => jawabanObj[i] !== undefined).length;
+      result[bagian] = { benar: "-", total: data.soal.length, dijawab, persen: "-", catatan: "Tidak dinilai" };
+    } else {
+      let benar = 0;
+      data.idx.forEach((i, j) => { if (jawabanObj[i] === data.soal[j].kunci) benar++; });
+      result[bagian] = { benar, total: data.soal.length, persen: Math.round((benar / data.soal.length) * 100) };
+    }
+  });
+  return result;
+}
+
 export default function UjianOnline() {
-  const [tahap, setTahap]               = useState("identitas");
-  const [identitas, setIdentitas]       = useState({ nama: "", kelas: "", nis: "", sekolah: "" });
-  const [jawaban, setJawaban]           = useState({});
-  const [waktu, setWaktu]               = useState(DURATION);
-  const [bagianAktif, setBagianAktif]   = useState(0);
-  const [error, setError]               = useState("");
-  const [loading, setLoading]           = useState(false);
-  const [hasil, setHasil]               = useState(null);
-  const [konfirmasi, setKonfirmasi]     = useState(false);
-  const [pelanggaran, setPelanggaran]   = useState(0);
-  const [showPeringatan, setShowPeringatan]     = useState(false);
-  const [pesanPeringatan, setPesanPeringatan]   = useState("");
+  // tahap: "identitas" | "pengerjaan" | "skorSesi1" | "pengerjaanSesi2" | "skorSesi2" | "sudahSubmit"
+  const [tahap, setTahap] = useState("identitas");
+  const [sesiAktif, setSesiAktif] = useState(1);
+  const [identitas, setIdentitas] = useState({ nama: "", kelas: "", nis: "", sekolah: "" });
+  const [jawabanSesi1, setJawabanSesi1] = useState({});
+  const [jawabanSesi2, setJawabanSesi2] = useState({});
+  const [waktu, setWaktu] = useState(DURATION_SESI);
+  const [bagianAktif, setBagianAktif] = useState(0);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [hasilSesi1, setHasilSesi1] = useState(null);
+  const [hasilSesi2, setHasilSesi2] = useState(null);
+  const [konfirmasi, setKonfirmasi] = useState(false);
+  const [pelanggaran, setPelanggaran] = useState(0);
+  const [showPeringatan, setShowPeringatan] = useState(false);
+  const [pesanPeringatan, setPesanPeringatan] = useState("");
   const [didiskualifikasi, setDidiskualifikasi] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const timerRef        = useRef(null);
-  const submitDoneRef   = useRef(false);
-  const pelanggaranRef  = useRef(0);
-  const jawabanRef      = useRef({});
-  const waktuRef        = useRef(DURATION);
-  const identitasRef    = useRef({ nama: "", kelas: "", nis: "", sekolah: "" });
+  const timerRef = useRef(null);
+  const submitDoneRef = useRef(false);
+  const pelanggaranRef = useRef(0);
+  const jawabanSesi1Ref = useRef({});
+  const jawabanSesi2Ref = useRef({});
+  const waktuRef = useRef(DURATION_SESI);
+  const identitasRef = useRef(identitas);
+  const tahapRef = useRef(tahap);
 
-  // Sinkronisasi ref supaya event listener selalu baca nilai terkini
-  useEffect(() => { jawabanRef.current   = jawaban;   }, [jawaban]);
-  useEffect(() => { waktuRef.current     = waktu;     }, [waktu]);
+  useEffect(() => { jawabanSesi1Ref.current = jawabanSesi1; }, [jawabanSesi1]);
+  useEffect(() => { jawabanSesi2Ref.current = jawabanSesi2; }, [jawabanSesi2]);
+  useEffect(() => { waktuRef.current = waktu; }, [waktu]);
   useEffect(() => { identitasRef.current = identitas; }, [identitas]);
+  useEffect(() => { tahapRef.current = tahap; }, [tahap]);
 
-   // ── Hitung skor ──
-  const hitungSkorDariRef = useCallback(() => {
-    let benar = 0;
-    SOAL.forEach((s, i) => { if (jawabanRef.current[i] === s.kunci) benar++; });
-    return { benar, total: SOAL.length, persen: Math.round((benar / SOAL.length) * 100) };
-  }, []);
-
-  // ── Kirim ke Google Sheet ──
-  const kirimKeSheet = useCallback(async (alasan = "Normal") => {
+  // ── Kirim Sesi 1 ke Google Sheet ──
+  const kirimSesi1 = useCallback(async (alasan = "Normal") => {
     if (submitDoneRef.current) return;
     submitDoneRef.current = true;
     clearInterval(timerRef.current);
     setLoading(true);
-    const skor = hitungSkorDariRef();
-    const id   = identitasRef.current;
-    // Hitung skor per mapel
-    const skorPerMapel = ["Penalaran Matematika", "Literasi Keislaman", "Literasi Membaca"].reduce((acc, mapel) => {
-      const soalMapel = SOAL.filter((s) => s.bagian === mapel);
-      const benarMapel = soalMapel.filter((s, li) => {
-        const gi = SOAL.findIndex((x) => x === soalMapel[li]);
-        return jawabanRef.current[gi] === s.kunci;
-      }).length;
-      acc[mapel] = { benar: benarMapel, total: soalMapel.length };
-      return acc;
-    }, {});
+    const skor = hitungSkor(SOAL_TPB, jawabanSesi1Ref.current);
+    const skorBagian = hitungSkorPerBagian(SOAL_TPB, jawabanSesi1Ref.current);
+    const id = identitasRef.current;
     const payload = {
+      sesi: "TPB - Tes Potensi Belajar",
       nama: id.nama, kelas: id.kelas, nis: id.nis, sekolah: id.sekolah,
       waktuSelesai: new Date().toLocaleString("id-ID"),
-      sisaWaktu:    formatWaktu(waktuRef.current),
-      skorBenar:    skor.benar,
-      skorTotal:    skor.total,
-      persenSkor:   skor.persen,
-      skorMatematika:  skorPerMapel["Penalaran Matematika"].benar,
-      skorKeislaman:   skorPerMapel["Literasi Keislaman"].benar,
-      skorMembaca:     skorPerMapel["Literasi Membaca"].benar,
-      jawaban:      SOAL.map((s, i) => jawabanRef.current[i] || "-").join("|"),
-      keterangan:   alasan,
+      sisaWaktu: formatWaktu(waktuRef.current),
+      // Skor total (exclude minat bakat)
+      skorBenar: skor.benar, skorTotal: skor.total, persenSkor: skor.persen,
+      // Skor per sub-bagian
+      verbal_benar: skorBagian["Kemampuan Verbal"]?.benar ?? "-",
+      verbal_total: skorBagian["Kemampuan Verbal"]?.total ?? 0,
+      verbal_persen: skorBagian["Kemampuan Verbal"]?.persen ?? "-",
+      numerik_benar: skorBagian["Kemampuan Numerik"]?.benar ?? "-",
+      numerik_total: skorBagian["Kemampuan Numerik"]?.total ?? 0,
+      numerik_persen: skorBagian["Kemampuan Numerik"]?.persen ?? "-",
+      logis_benar: skorBagian["Penalaran Logis"]?.benar ?? "-",
+      logis_total: skorBagian["Penalaran Logis"]?.total ?? 0,
+      logis_persen: skorBagian["Penalaran Logis"]?.persen ?? "-",
+      // Kepribadian (tidak dinilai, simpan jawaban mentah)
+      kepribadian_dijawab: skorBagian["Kepribadian & Minat Bakat"]?.dijawab ?? 0,
+      kepribadian_total: skorBagian["Kepribadian & Minat Bakat"]?.total ?? 0,
+      kepribadian_jawaban: SOAL_TPB.filter(s => s.bagian === "Kepribadian & Minat Bakat")
+        .map(s => jawabanSesi1Ref.current[SOAL_TPB.indexOf(s)] || "-").join("|"),
+      // Minat Bakat 40 soal (tidak dinilai, hitung profil dominan di Apps Script)
+      minat_dijawab: skorBagian["Minat Bakat"]?.dijawab ?? 0,
+      minat_total: skorBagian["Minat Bakat"]?.total ?? 0,
+      minat_jawaban: SOAL_TPB.filter(s => s.bagian === "Minat Bakat")
+        .map(s => jawabanSesi1Ref.current[SOAL_TPB.indexOf(s)] || "-").join("|"),
+      // Jawaban per bagian (raw)
+      jawaban_verbal: SOAL_TPB.filter(s => s.bagian === "Kemampuan Verbal")
+        .map(s => jawabanSesi1Ref.current[SOAL_TPB.indexOf(s)] || "-").join("|"),
+      jawaban_numerik: SOAL_TPB.filter(s => s.bagian === "Kemampuan Numerik")
+        .map(s => jawabanSesi1Ref.current[SOAL_TPB.indexOf(s)] || "-").join("|"),
+      jawaban_logis: SOAL_TPB.filter(s => s.bagian === "Penalaran Logis")
+        .map(s => jawabanSesi1Ref.current[SOAL_TPB.indexOf(s)] || "-").join("|"),
+      semua_jawaban: SOAL_TPB.map((s, i) => jawabanSesi1Ref.current[i] || "-").join("|"),
+      keterangan: alasan,
     };
     try {
-      await fetch(GOOGLE_SCRIPT_URL, {
-        method: "POST", mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      await fetch(GOOGLE_SCRIPT_URL_TPB, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    } catch (_) {}
+    const minatJawaban = SOAL_TPB.filter(s => s.bagian === "Minat Bakat").map(s => jawabanSesi1Ref.current[SOAL_TPB.indexOf(s)] || "-");
+    setHasilSesi1({ ...skor, perBagian: skorBagian, minatJawaban });
+    setLoading(false);
+    setTahap("skorSesi1");
+  }, []);
+
+  // ── Kirim Sesi 2 ke Google Sheet ──
+  const kirimSesi2 = useCallback(async (alasan = "Normal") => {
+    if (submitDoneRef.current) return;
+    submitDoneRef.current = true;
+    clearInterval(timerRef.current);
+    setLoading(true);
+    const skor = hitungSkor(SOAL_TPA, jawabanSesi2Ref.current);
+    const skorBagian = hitungSkorPerBagian(SOAL_TPA, jawabanSesi2Ref.current);
+    const id = identitasRef.current;
+    const payload = {
+      sesi: "TPA - Tes Potensi Akademik",
+      nama: id.nama, kelas: id.kelas, nis: id.nis, sekolah: id.sekolah,
+      waktuSelesai: new Date().toLocaleString("id-ID"),
+      sisaWaktu: formatWaktu(waktuRef.current),
+      skorBenar: skor.benar, skorTotal: skor.total, persenSkor: skor.persen,
+      // Skor per sub-bagian TPA
+      matika_benar: skorBagian["Penalaran Matematika"]?.benar ?? "-",
+      matika_total: skorBagian["Penalaran Matematika"]?.total ?? 0,
+      matika_persen: skorBagian["Penalaran Matematika"]?.persen ?? "-",
+      keislaman_benar: skorBagian["Literasi Keislaman"]?.benar ?? "-",
+      keislaman_total: skorBagian["Literasi Keislaman"]?.total ?? 0,
+      keislaman_persen: skorBagian["Literasi Keislaman"]?.persen ?? "-",
+      membaca_benar: skorBagian["Literasi Membaca"]?.benar ?? "-",
+      membaca_total: skorBagian["Literasi Membaca"]?.total ?? 0,
+      membaca_persen: skorBagian["Literasi Membaca"]?.persen ?? "-",
+      jawaban: SOAL_TPA.map((s, i) => jawabanSesi2Ref.current[i] || "-").join("|"),
+      keterangan: alasan,
+    };
+    try {
+      await fetch(GOOGLE_SCRIPT_URL_TPA, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     } catch (_) {}
     localStorage.setItem(`ujian_submitted_${id.nis}`, JSON.stringify({ nama: id.nama, waktu: new Date().toLocaleString("id-ID") }));
-    setHasil(skor);
+    setHasilSesi2({ ...skor, perBagian: skorBagian });
     setLoading(false);
-    setTahap("selesai");
-  }, [hitungSkorDariRef]);
+    setTahap("skorSesi2");
+  }, []);
 
   // ── Timer countdown ──
   useEffect(() => {
-    if (tahap !== "pengerjaan") return;
+    const sedangUjian = tahap === "pengerjaan" || tahap === "pengerjaanSesi2";
+    if (!sedangUjian) return;
     timerRef.current = setInterval(() => {
       setWaktu((w) => {
-        if (w <= 1) { clearInterval(timerRef.current); kirimKeSheet("Waktu habis"); return 0; }
+        if (w <= 1) {
+          clearInterval(timerRef.current);
+          if (tahapRef.current === "pengerjaan") kirimSesi1("Waktu habis");
+          else kirimSesi2("Waktu habis");
+          return 0;
+        }
         return w - 1;
       });
     }, 1000);
     return () => clearInterval(timerRef.current);
-  }, [tahap, kirimKeSheet]);
+  }, [tahap, kirimSesi1, kirimSesi2]);
 
-  // ── Anti-cheat: deteksi pindah tab / minimize ──
+  // ── Anti-cheat ──
   useEffect(() => {
-    if (tahap !== "pengerjaan") return;
-
+    const sedangUjian = tahap === "pengerjaan" || tahap === "pengerjaanSesi2";
+    if (!sedangUjian) return;
     const tangkapPindahTab = () => {
       if (!document.hidden) return;
       pelanggaranRef.current += 1;
       const jumlah = pelanggaranRef.current;
       setPelanggaran(jumlah);
-
       if (jumlah >= MAX_PELANGGARAN) {
         setDidiskualifikasi(true);
         setShowPeringatan(false);
-        kirimKeSheet(`Diskualifikasi - pindah tab ${jumlah}x`);
+        if (tahapRef.current === "pengerjaan") kirimSesi1(`Diskualifikasi - pindah tab ${jumlah}x`);
+        else kirimSesi2(`Diskualifikasi - pindah tab ${jumlah}x`);
       } else {
-        setPesanPeringatan(
-          `Kamu terdeteksi meninggalkan halaman ujian!\n\nIni adalah pelanggaran ke-${jumlah} dari ${MAX_PELANGGARAN}.\nJika mencapai ${MAX_PELANGGARAN}x, jawaban otomatis dikumpulkan dan kamu DISKUALIFIKASI.`
-        );
+        setPesanPeringatan(`Kamu terdeteksi meninggalkan halaman ujian!\n\nIni adalah pelanggaran ke-${jumlah} dari ${MAX_PELANGGARAN}.\nJika mencapai ${MAX_PELANGGARAN}x, jawaban otomatis dikumpulkan dan kamu DISKUALIFIKASI.`);
         setShowPeringatan(true);
       }
     };
-
-    // Blokir klik kanan
     const blokKanan = (e) => e.preventDefault();
-
-    // Blokir shortcut DevTools & curang
     const blokKeyboard = (e) => {
       const k = e.key.toLowerCase();
-      if (
-        e.key === "F12" ||
-        (e.ctrlKey && k === "u") ||
-        (e.ctrlKey && e.shiftKey && ["i","j","c","k"].includes(k)) ||
-        (e.ctrlKey && k === "s") ||
-        (e.ctrlKey && k === "p") ||
-        (e.altKey && k === "tab")
-      ) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
+      if (e.key === "F12" || (e.ctrlKey && k === "u") || (e.ctrlKey && e.shiftKey && ["i","j","c","k"].includes(k)) || (e.ctrlKey && k === "s") || (e.ctrlKey && k === "p") || (e.altKey && k === "tab")) { e.preventDefault(); e.stopPropagation(); }
     };
-
-    // Blokir copy paste
     const blokCopy = (e) => e.preventDefault();
-
     document.addEventListener("visibilitychange", tangkapPindahTab);
     document.addEventListener("contextmenu", blokKanan);
     document.addEventListener("keydown", blokKeyboard);
     document.addEventListener("copy", blokCopy);
     document.addEventListener("cut", blokCopy);
-
     return () => {
       document.removeEventListener("visibilitychange", tangkapPindahTab);
       document.removeEventListener("contextmenu", blokKanan);
@@ -305,184 +503,308 @@ export default function UjianOnline() {
       document.removeEventListener("copy", blokCopy);
       document.removeEventListener("cut", blokCopy);
     };
-  }, [tahap, kirimKeSheet]);
+  }, [tahap, kirimSesi1, kirimSesi2]);
 
-  // ── Sinkron status fullscreen ──
   useEffect(() => {
     const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", onFsChange);
     return () => document.removeEventListener("fullscreenchange", onFsChange);
   }, []);
 
-  const masukFullscreen = () => {
-    document.documentElement.requestFullscreen().catch(() => {});
-  };
+  const masukFullscreen = () => { document.documentElement.requestFullscreen().catch(() => {}); };
 
-  // ── Mulai ujian ──
   const mulaiUjian = () => {
-    if (!identitas.nama.trim() || !identitas.kelas.trim() || !identitas.nis.trim() || !identitas.sekolah.trim()) {
-      setError("Semua field wajib diisi!"); return;
-    }
+    if (!identitas.nama.trim() || !identitas.kelas.trim() || !identitas.nis.trim() || !identitas.sekolah.trim()) { setError("Semua field wajib diisi!"); return; }
     const sudah = localStorage.getItem(`ujian_submitted_${identitas.nis}`);
     if (sudah) { setTahap("sudahSubmit"); return; }
     setError("");
     document.documentElement.requestFullscreen().catch(() => {});
+    submitDoneRef.current = false;
+    pelanggaranRef.current = 0;
+    setWaktu(DURATION_SESI);
+    setBagianAktif(0);
+    setSesiAktif(1);
     setTahap("pengerjaan");
   };
 
-  const soalBagian   = SOAL.filter((s) => s.bagian === BAGIAN_LIST[bagianAktif]);
-  const indeksGlobal = (i) => SOAL.findIndex((s) => s === soalBagian[i]);
-  const totalDijawab = Object.keys(jawaban).length;
-  const persen       = waktu / DURATION;
-  const warnaTimer   = waktu < 300 ? "#e74c3c" : waktu < 900 ? "#f39c12" : "#27ae60";
+  const lanjutSesi2 = () => {
+    submitDoneRef.current = false;
+    pelanggaranRef.current = 0;
+    setPelanggaran(0);
+    setWaktu(DURATION_SESI);
+    setBagianAktif(0);
+    setSesiAktif(2);
+    document.documentElement.requestFullscreen().catch(() => {});
+    setTahap("pengerjaanSesi2");
+  };
 
-  // ══════════════════════
-  // RENDER: Sudah submit
-  // ══════════════════════
-  if (tahap === "sudahSubmit") return (
-    <div style={S.fullCenter}>
-      <div style={S.card}>
-        <div style={{ fontSize: 56, marginBottom: 16 }}>🔒</div>
-        <h2 style={{ ...S.h2, color: "#e74c3c" }}>Sudah Pernah Submit</h2>
-        <p style={S.muted}>NIS ini sudah pernah mengerjakan ujian. Setiap peserta hanya boleh submit satu kali.</p>
-        <p style={{ ...S.muted, fontWeight: 600 }}>Hubungi pengawas jika ada masalah.</p>
-      </div>
-    </div>
-  );
+  const SOAL_AKTIF = sesiAktif === 1 ? SOAL_TPB : SOAL_TPA;
+  const BAGIAN_LIST_AKTIF = sesiAktif === 1 ? BAGIAN_LIST_TPB : BAGIAN_LIST_TPA;
+  const JAWABAN_AKTIF = sesiAktif === 1 ? jawabanSesi1 : jawabanSesi2;
+  const SET_JAWABAN = sesiAktif === 1 ? setJawabanSesi1 : setJawabanSesi2;
+  const KIRIM_AKTIF = sesiAktif === 1 ? kirimSesi1 : kirimSesi2;
+  const NAMA_SESI = sesiAktif === 1 ? "Tes Potensi Belajar" : "Tes Potensi Akademik";
 
-  // ══════════════════════
-  // RENDER: Selesai
-  // ══════════════════════
-  if (tahap === "selesai") {
-    const predikat = hasil.persen >= 80 ? { label: "Sangat Baik", color: "#27ae60" }
-      : hasil.persen >= 65 ? { label: "Baik", color: "#2980b9" }
-      : hasil.persen >= 50 ? { label: "Cukup", color: "#f39c12" }
-      : { label: "Perlu Bimbingan", color: "#e74c3c" };
-    const rincian = BAGIAN_LIST.map((b) => {
-      const soalB = SOAL.filter((s) => s.bagian === b);
-      const benar = soalB.filter((s, li) => jawaban[SOAL.findIndex((x) => x === soalB[li])] === s.kunci).length;
-      return { bagian: b, benar, total: soalB.length };
-    });
+  const soalBagian = SOAL_AKTIF
+    .map((s, i) => ({ ...s, globalIdx: i }))
+    .filter((s) => s.bagian === BAGIAN_LIST_AKTIF[bagianAktif]);
+
+  const totalDijawab = Object.keys(JAWABAN_AKTIF).length;
+  const warnaTimer = waktu <= 300 ? "#e74c3c" : waktu <= 600 ? "#f39c12" : "#27ae60";
+  const persen = waktu / DURATION_SESI;
+
+  const S = {
+    card: { background: "#fff", borderRadius: 16, boxShadow: "0 4px 24px rgba(0,0,0,0.10)", padding: "32px 28px", maxWidth: 420, width: "100%", margin: "0 auto" },
+    label: { display: "block", fontSize: 13, fontWeight: 600, color: "#555", marginBottom: 6 },
+    input: { width: "100%", padding: "10px 14px", borderRadius: 10, border: "1.5px solid #e0e0e0", fontSize: 15, outline: "none", boxSizing: "border-box" },
+    btnPrimary: { width: "100%", padding: "13px 0", borderRadius: 12, border: "none", background: "linear-gradient(90deg,#2980b9,#6dd5fa)", color: "#fff", fontSize: 16, fontWeight: 700, cursor: "pointer" },
+    btnSec: { padding: "10px 22px", borderRadius: 10, border: "1.5px solid #2980b9", background: "#fff", color: "#2980b9", fontSize: 14, fontWeight: 600, cursor: "pointer" },
+    errorBox: { background: "#fdecea", color: "#b71c1c", borderRadius: 8, padding: "10px 14px", marginBottom: 12, fontSize: 13 },
+    muted: { fontSize: 13, color: "#888", margin: 0 },
+  };
+
+  // ── RENDER: Halaman Login ──
+  if (tahap === "identitas")
     return (
-      <div style={S.fullCenter}>
-        <div style={{ ...S.card, maxWidth: 520 }}>
-          <div style={{ fontSize: 56, marginBottom: 8 }}>{didiskualifikasi ? "🚫" : "🎉"}</div>
-          <h2 style={{ ...S.h2, color: didiskualifikasi ? "#e74c3c" : "#1a1a2e" }}>
-            {didiskualifikasi ? "Ujian Dihentikan" : "Ujian Selesai!"}
-          </h2>
-          {didiskualifikasi && (
-            <p style={{ color: "#e74c3c", fontWeight: 600, fontSize: 14, marginBottom: 8 }}>
-              Terdeteksi meninggalkan halaman ujian {pelanggaran}x.
-            </p>
-          )}
-          <p style={S.muted}>Jawaban kamu telah berhasil dikirim.</p>
-          <div style={{ background: "#f8f9fa", borderRadius: 16, padding: "24px 32px", margin: "24px 0", textAlign: "center" }}>
-            <div style={{ fontSize: 64, fontWeight: 800, color: predikat.color, lineHeight: 1 }}>
-              {hasil.persen}<span style={{ fontSize: 28 }}>%</span>
-            </div>
-            <div style={{ fontSize: 18, color: "#555", marginTop: 4 }}>{hasil.benar} / {hasil.total} soal benar</div>
-            <div style={{ display: "inline-block", background: predikat.color, color: "#fff", borderRadius: 20, padding: "4px 20px", marginTop: 12, fontSize: 14, fontWeight: 600 }}>
-              {predikat.label}
+      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+        <div style={S.card}>
+          <div style={{ textAlign: "center", marginBottom: 24 }}>
+            <div style={{ fontSize: 40, marginBottom: 8 }}>📝</div>
+            <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1a1a2e", margin: "8px 0 4px" }}>Ujian Online</h1>
+            <p style={S.muted}>2 Sesi • 120 Menit Total</p>
+            <div style={{ marginTop: 8, display: "flex", justifyContent: "center", gap: 8 }}>
+              <span style={{ background: "#e8f4fd", color: "#2980b9", borderRadius: 8, padding: "3px 12px", fontSize: 12, fontWeight: 700 }}>Sesi 1: TPB • 60 menit</span>
+              <span style={{ background: "#eafaf1", color: "#27ae60", borderRadius: 8, padding: "3px 12px", fontSize: 12, fontWeight: 700 }}>Sesi 2: TPA • 60 menit</span>
             </div>
           </div>
-          <div style={{ width: "100%" }}>
-            {rincian.map((r) => (
-              <div key={r.bagian} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: "1px solid #eee" }}>
-                <span style={{ fontSize: 14, color: "#444" }}>{r.bagian}</span>
-                <span style={{ fontWeight: 700, color: WARNA_BAGIAN[r.bagian].accent }}>{r.benar}/{r.total}</span>
-              </div>
-            ))}
+          {["nama", "kelas", "nis", "sekolah"].map((field) => (
+            <div key={field} style={{ marginBottom: 16 }}>
+              <label style={S.label}>{field === "nis" ? "NIS" : field.charAt(0).toUpperCase() + field.slice(1)}</label>
+              <input style={S.input} placeholder={`Masukkan ${field === "nis" ? "NIS" : field}...`} value={identitas[field]} onChange={(e) => setIdentitas((p) => ({ ...p, [field]: e.target.value }))} />
+            </div>
+          ))}
+          {error && <div style={S.errorBox}>{error}</div>}
+          <div style={{ background: "#fff8e1", border: "1px solid #ffe082", borderRadius: 10, padding: "12px 16px", marginBottom: 10, fontSize: 13, color: "#795548" }}>
+            ⚠️ Setiap NIS hanya dapat submit <strong>satu kali</strong>.
           </div>
-          <p style={{ ...S.muted, marginTop: 20, fontSize: 13 }}>Terima kasih, <strong>{identitas.nama}</strong>!</p>
+          <div style={{ background: "#fdecea", border: "1px solid #ffcdd2", borderRadius: 10, padding: "12px 16px", marginBottom: 20, fontSize: 13, color: "#b71c1c", lineHeight: 1.6 }}>
+            🔒 Ujian berjalan dalam <strong>mode layar penuh</strong>.<br />
+            Dilarang: pindah tab, minimize, klik kanan, copy-paste.<br />
+            Pelanggaran <strong>{MAX_PELANGGARAN}x</strong> → DISKUALIFIKASI.
+          </div>
+          <button style={S.btnPrimary} onClick={mulaiUjian}>Mulai Ujian (Layar Penuh) →</button>
         </div>
       </div>
     );
-  }
 
-  // ══════════════════════
-  // RENDER: Identitas
-  // ══════════════════════
-  if (tahap === "identitas") return (
-    <div style={S.fullCenter}>
-      <div style={{ ...S.card, maxWidth: 460 }}>
-        <div style={{ textAlign: "center", marginBottom: 28 }}>
-          <div style={{ fontSize: 48 }}>📝</div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1a1a2e", margin: "8px 0 4px" }}>Ujian Online</h1>
-          <p style={S.muted}>48 soal • 3 bagian • 90 menit</p>
+  // ── RENDER: Sudah Submit ──
+  if (tahap === "sudahSubmit")
+    return (
+      <div style={{ minHeight: "100vh", background: "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ ...S.card, textAlign: "center" }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>🚫</div>
+          <h2 style={{ color: "#e74c3c" }}>NIS Sudah Digunakan</h2>
+          <p style={{ color: "#666" }}>NIS <strong>{identitas.nis}</strong> sudah pernah mengumpulkan jawaban. Setiap NIS hanya dapat mengikuti ujian satu kali.</p>
         </div>
-        {["nama", "kelas", "nis", "sekolah"].map((field) => (
-          <div key={field} style={{ marginBottom: 16 }}>
-            <label style={S.label}>{field === "nis" ? "NIS" : field.charAt(0).toUpperCase() + field.slice(1)}</label>
-            <input style={S.input} placeholder={`Masukkan ${field === "nis" ? "NIS" : field}...`}
-              value={identitas[field]} onChange={(e) => setIdentitas((p) => ({ ...p, [field]: e.target.value }))} />
-          </div>
-        ))}
-        {error && <div style={S.errorBox}>{error}</div>}
-        <div style={{ background: "#fff8e1", border: "1px solid #ffe082", borderRadius: 10, padding: "12px 16px", marginBottom: 10, fontSize: 13, color: "#795548" }}>
-          ⚠️ Setiap NIS hanya dapat submit <strong>satu kali</strong>.
-        </div>
-        <div style={{ background: "#fdecea", border: "1px solid #ffcdd2", borderRadius: 10, padding: "12px 16px", marginBottom: 20, fontSize: 13, color: "#b71c1c", lineHeight: 1.6 }}>
-          🔒 Ujian berjalan dalam <strong>mode layar penuh</strong>.<br />
-          Dilarang: pindah tab, minimize, klik kanan, copy-paste, buka DevTools.<br />
-          Pelanggaran <strong>{MAX_PELANGGARAN}x</strong> → jawaban otomatis dikumpulkan & <strong>DISKUALIFIKASI</strong>.
-        </div>
-        <button style={S.btnPrimary} onClick={mulaiUjian}>Mulai Ujian (Layar Penuh) →</button>
       </div>
-    </div>
-  );
+    );
 
-  // ══════════════════════════════════════
-  // RENDER: Pengerjaan Soal
-  // ══════════════════════════════════════
+  // ── RENDER: Skor Sesi 1 ──
+  if (tahap === "skorSesi1")
+    return (
+      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg,#1a1a2e,#16213e)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+        <div style={{ ...S.card, textAlign: "center", maxWidth: 500 }}>
+          <div style={{ fontSize: 48, marginBottom: 8 }}>✅</div>
+          <h2 style={{ color: "#27ae60", fontSize: 22, marginBottom: 4 }}>Sesi 1 Selesai!</h2>
+          <p style={{ color: "#555", marginBottom: 16 }}>Tes Potensi Belajar (TPB)</p>
+          {/* Skor total */}
+          <div style={{ background: "#eafaf1", borderRadius: 14, padding: "16px", marginBottom: 16 }}>
+            <div style={{ fontSize: 13, color: "#555", marginBottom: 4 }}>Skor Total (Materi Akademik)</div>
+            <div style={{ fontSize: 48, fontWeight: 800, color: "#27ae60" }}>{hasilSesi1?.persen}%</div>
+            <div style={{ fontSize: 14, color: "#555" }}>{hasilSesi1?.benar} / {hasilSesi1?.total} soal benar</div>
+          </div>
+          {/* Skor per bagian */}
+          <div style={{ textAlign: "left", marginBottom: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#333", marginBottom: 8 }}>Rincian per Bagian:</div>
+            {["Kemampuan Verbal", "Kemampuan Numerik", "Penalaran Logis"].map((b) => {
+              const d = hasilSesi1?.perBagian?.[b];
+              if (!d) return null;
+              return (
+                <div key={b} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "#f8f9fa", borderRadius: 8, marginBottom: 6 }}>
+                  <span style={{ fontSize: 13, color: "#333" }}>{b}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#2980b9" }}>{d.benar}/{d.total} ({d.persen}%)</span>
+                </div>
+              );
+            })}
+            {/* Kepribadian — tidak dinilai */}
+            {(() => {
+              const d = hasilSesi1?.perBagian?.["Kepribadian & Minat Bakat"];
+              if (!d) return null;
+              return (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "#f3e5f5", borderRadius: 8, marginBottom: 6 }}>
+                  <span style={{ fontSize: 13, color: "#333" }}>Kepribadian</span>
+                  <span style={{ fontSize: 12, color: "#8e44ad", fontWeight: 600 }}>{d.dijawab}/{d.total} dijawab • Tidak dinilai</span>
+                </div>
+              );
+            })()}
+            {/* Minat Bakat 40 soal — tampilkan profil dominan */}
+            {(() => {
+              const d = hasilSesi1?.perBagian?.["Minat Bakat"];
+              if (!d) return null;
+              // Hitung profil dari jawaban
+              const minatSoal = (hasilSesi1?.minatJawaban || []);
+              const profil = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+              minatSoal.forEach(j => { if (profil[j] !== undefined) profil[j]++; });
+              const labelProfil = { A: "Investigatif", B: "Sosial", C: "Artistik", D: "Teknis", E: "Kinestetik" };
+              const dominan = Object.entries(profil).sort((a, b) => b[1] - a[1])[0];
+              return (
+                <div style={{ padding: "10px 12px", background: "#fff8e1", borderRadius: 8, marginBottom: 6, border: "1px solid #ffe082" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                    <span style={{ fontSize: 13, color: "#333", fontWeight: 600 }}>Minat Bakat</span>
+                    <span style={{ fontSize: 12, color: "#f39c12" }}>{d.dijawab}/{d.total} dijawab</span>
+                  </div>
+                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                    {Object.entries(profil).map(([k, v]) => (
+                      <span key={k} style={{ fontSize: 11, padding: "2px 8px", borderRadius: 6, background: dominan && dominan[0] === k ? "#f39c12" : "#f5f5f5", color: dominan && dominan[0] === k ? "#fff" : "#555", fontWeight: dominan && dominan[0] === k ? 700 : 400 }}>
+                        {labelProfil[k]}: {v}
+                      </span>
+                    ))}
+                  </div>
+                  {dominan && <div style={{ marginTop: 6, fontSize: 12, color: "#795548" }}>Profil dominan: <strong>{labelProfil[dominan[0]]}</strong></div>}
+                </div>
+              );
+            })()}
+          </div>
+          <div style={{ background: "#e8f4fd", border: "1px solid #d0e8f8", borderRadius: 10, padding: "14px 16px", marginBottom: 20, fontSize: 14, color: "#2980b9" }}>
+            🎯 Lanjutkan ke <strong>Sesi 2: Tes Potensi Akademik (TPA)</strong><br />
+            <span style={{ fontSize: 12, color: "#555" }}>Waktu: 60 menit • {SOAL_TPA.length} soal</span>
+          </div>
+          <button style={{ ...S.btnPrimary, background: "linear-gradient(90deg,#27ae60,#2ecc71)" }} onClick={lanjutSesi2}>
+            Lanjut Sesi 2: TPA →
+          </button>
+        </div>
+      </div>
+    );
+
+  // ── RENDER: Skor Sesi 2 (Selesai Total) ──
+  if (tahap === "skorSesi2")
+    return (
+      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg,#1a1a2e,#16213e)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+        <div style={{ ...S.card, textAlign: "center", maxWidth: 520 }}>
+          <div style={{ fontSize: 48, marginBottom: 8 }}>🎉</div>
+          <h2 style={{ color: "#f39c12", fontSize: 22, marginBottom: 4 }}>Ujian Selesai!</h2>
+          <p style={{ color: "#555", marginBottom: 16 }}>Terima kasih, <strong>{identitas.nama}</strong>. Berikut rekap nilaimu:</p>
+          {/* Rekap skor 2 sesi */}
+          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+            <div style={{ flex: 1, background: "#eafaf1", borderRadius: 14, padding: "14px" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#27ae60", marginBottom: 4 }}>Sesi 1 — TPB</div>
+              <div style={{ fontSize: 32, fontWeight: 800, color: "#27ae60" }}>{hasilSesi1?.persen}%</div>
+              <div style={{ fontSize: 11, color: "#555" }}>{hasilSesi1?.benar}/{hasilSesi1?.total} benar</div>
+            </div>
+            <div style={{ flex: 1, background: "#e8f4fd", borderRadius: 14, padding: "14px" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#2980b9", marginBottom: 4 }}>Sesi 2 — TPA</div>
+              <div style={{ fontSize: 32, fontWeight: 800, color: "#2980b9" }}>{hasilSesi2?.persen}%</div>
+              <div style={{ fontSize: 11, color: "#555" }}>{hasilSesi2?.benar}/{hasilSesi2?.total} benar</div>
+            </div>
+          </div>
+          {/* Rincian TPB */}
+          <div style={{ textAlign: "left", marginBottom: 12 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#27ae60", marginBottom: 6 }}>📊 Rincian TPB:</div>
+            {["Kemampuan Verbal", "Kemampuan Numerik", "Penalaran Logis"].map((b) => {
+              const d = hasilSesi1?.perBagian?.[b];
+              if (!d) return null;
+              return (
+                <div key={b} style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: "#f8f9fa", borderRadius: 8, marginBottom: 4, fontSize: 12 }}>
+                  <span style={{ color: "#333" }}>{b}</span>
+                  <span style={{ fontWeight: 700, color: "#27ae60" }}>{d.benar}/{d.total} ({d.persen}%)</span>
+                </div>
+              );
+            })}
+            {(() => {
+              const d = hasilSesi1?.perBagian?.["Kepribadian & Minat Bakat"];
+              if (!d) return null;
+              return (
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: "#f3e5f5", borderRadius: 8, marginBottom: 4, fontSize: 12 }}>
+                  <span style={{ color: "#333" }}>Kepribadian & Minat Bakat</span>
+                  <span style={{ color: "#8e44ad" }}>{d.dijawab}/{d.total} dijawab</span>
+                </div>
+              );
+            })()}
+          </div>
+          {/* Rincian TPA */}
+          <div style={{ textAlign: "left", marginBottom: 16 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#2980b9", marginBottom: 6 }}>📊 Rincian TPA:</div>
+            {["Penalaran Matematika", "Literasi Keislaman", "Literasi Membaca"].map((b) => {
+              const d = hasilSesi2?.perBagian?.[b];
+              if (!d) return null;
+              return (
+                <div key={b} style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: "#f8f9fa", borderRadius: 8, marginBottom: 4, fontSize: 12 }}>
+                  <span style={{ color: "#333" }}>{b}</span>
+                  <span style={{ fontWeight: 700, color: "#2980b9" }}>{d.benar}/{d.total} ({d.persen}%)</span>
+                </div>
+              );
+            })}
+          </div>
+          {/* Rata-rata */}
+          <div style={{ background: "#fff8e1", borderRadius: 12, padding: "12px", marginBottom: 12 }}>
+            <div style={{ fontSize: 12, color: "#795548" }}>Rata-rata Nilai Akademik</div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: "#f39c12" }}>
+              {Math.round(((hasilSesi1?.persen || 0) + (hasilSesi2?.persen || 0)) / 2)}%
+            </div>
+          </div>
+          <p style={{ fontSize: 12, color: "#888" }}>Jawaban telah dikirim. Hasil dapat dilihat dari panitia.</p>
+        </div>
+      </div>
+    );
+
+  // ── RENDER: Pengerjaan (Sesi 1 atau 2) ──
+  const sedangUjian = tahap === "pengerjaan" || tahap === "pengerjaanSesi2";
+  if (!sedangUjian) return null;
+
   return (
     <div style={{ fontFamily: "'Segoe UI', sans-serif", minHeight: "100vh", background: "#f0f2f5", userSelect: "none", WebkitUserSelect: "none" }}>
-
-      {/* Overlay Peringatan */}
+      {/* Modal Peringatan */}
       {showPeringatan && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.80)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, padding: 20 }}>
-          <div style={{ background: "#fff", borderRadius: 20, padding: 36, maxWidth: 420, width: "100%", textAlign: "center", boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}>
-            <div style={{ fontSize: 60 }}>🚨</div>
-            <h3 style={{ color: "#e74c3c", fontSize: 20, fontWeight: 800, margin: "14px 0 10px" }}>Peringatan!</h3>
-            <p style={{ whiteSpace: "pre-line", fontSize: 14, color: "#444", lineHeight: 1.8, marginBottom: 16 }}>{pesanPeringatan}</p>
-            <div style={{ background: "#fdecea", borderRadius: 10, padding: "10px 16px", fontSize: 13, color: "#c62828", fontWeight: 700, marginBottom: 20 }}>
-              Sisa toleransi: {MAX_PELANGGARAN - pelanggaran}x lagi
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ background: "#fff", borderRadius: 16, padding: 28, maxWidth: 380, width: "90%", textAlign: "center" }}>
+            <div style={{ fontSize: 36, marginBottom: 8 }}>⚠️</div>
+            <h3 style={{ color: "#e74c3c", marginBottom: 12 }}>Peringatan!</h3>
+            <p style={{ fontSize: 14, color: "#333", whiteSpace: "pre-line", marginBottom: 20 }}>{pesanPeringatan}</p>
+            <button style={{ ...S.btnPrimary, background: "#e74c3c" }} onClick={() => { setShowPeringatan(false); masukFullscreen(); }}>Kembali ke Ujian</button>
+          </div>
+        </div>
+      )}
+      {/* Modal Konfirmasi Submit */}
+      {konfirmasi && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ background: "#fff", borderRadius: 16, padding: 28, maxWidth: 360, width: "90%", textAlign: "center" }}>
+            <div style={{ fontSize: 36, marginBottom: 8 }}>📤</div>
+            <h3 style={{ marginBottom: 8 }}>Kumpulkan Jawaban?</h3>
+            <p style={{ fontSize: 14, color: "#555", marginBottom: 8 }}>Sesi {sesiAktif}: <strong>{NAMA_SESI}</strong></p>
+            <p style={{ fontSize: 14, color: "#555", marginBottom: 20 }}>Sudah dijawab: <strong>{totalDijawab}/{SOAL_AKTIF.length}</strong> soal.</p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button style={{ ...S.btnSec, flex: 1 }} onClick={() => setKonfirmasi(false)}>Batal</button>
+              <button style={{ ...S.btnPrimary, flex: 1 }} onClick={() => { setKonfirmasi(false); KIRIM_AKTIF(); }}>
+                {loading ? "Mengirim..." : "Ya, Kumpulkan"}
+              </button>
             </div>
-            <button onClick={() => { setShowPeringatan(false); masukFullscreen(); }}
-              style={{ ...S.btnPrimary, background: "#e74c3c" }}>
-              Saya Mengerti — Lanjutkan Ujian
-            </button>
           </div>
         </div>
       )}
-
-      {/* Overlay Diskualifikasi */}
+      {/* Diskualifikasi */}
       {didiskualifikasi && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.90)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, padding: 20 }}>
-          <div style={{ background: "#fff", borderRadius: 20, padding: 36, maxWidth: 400, width: "100%", textAlign: "center" }}>
-            <div style={{ fontSize: 60 }}>🚫</div>
-            <h3 style={{ color: "#e74c3c", fontSize: 22, fontWeight: 800, margin: "14px 0 10px" }}>DISKUALIFIKASI</h3>
-            <p style={{ fontSize: 14, color: "#555", lineHeight: 1.7 }}>
-              Terdeteksi meninggalkan halaman sebanyak <strong>{pelanggaran}x</strong>.<br />
-              Jawaban sedang dikirim secara otomatis...
-            </p>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ background: "#fff", borderRadius: 16, padding: 32, maxWidth: 380, width: "90%", textAlign: "center" }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>🚫</div>
+            <h2 style={{ color: "#e74c3c" }}>DISKUALIFIKASI</h2>
+            <p style={{ color: "#666" }}>Kamu terdeteksi meninggalkan halaman ujian sebanyak {MAX_PELANGGARAN}x. Jawaban telah otomatis dikumpulkan.</p>
           </div>
         </div>
       )}
-
-      {/* Banner peringatan keluar fullscreen */}
-      {!isFullscreen && !showPeringatan && !didiskualifikasi && (
-        <div style={{ background: "#e74c3c", color: "#fff", textAlign: "center", padding: "10px 16px", fontSize: 13, fontWeight: 600 }}>
-          ⚠️ Kamu keluar dari mode layar penuh!{" "}
-          <span onClick={masukFullscreen} style={{ textDecoration: "underline", cursor: "pointer", fontWeight: 800 }}>
-            Klik di sini untuk kembali
-          </span>
-        </div>
-      )}
-
-      {/* Header Sticky */}
+      {/* Header */}
       <div style={{ position: "sticky", top: 0, zIndex: 100, background: "#1a1a2e", color: "#fff", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
         <div>
-          <div style={{ fontSize: 12, opacity: 0.7 }}>Ujian Online</div>
+          <div style={{ fontSize: 11, opacity: 0.7 }}>Sesi {sesiAktif}/2 — {NAMA_SESI}</div>
           <div style={{ fontSize: 14, fontWeight: 700 }}>{identitas.nama} • {identitas.kelas}</div>
         </div>
         <div style={{ textAlign: "center" }}>
@@ -492,140 +814,82 @@ export default function UjianOnline() {
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: 11, color: pelanggaran > 0 ? "#e74c3c" : "#aaa" }}>
-            🚨 {pelanggaran}/{MAX_PELANGGARAN} pelanggaran
-          </div>
-          <div style={{ fontSize: 13, fontWeight: 700, marginTop: 2 }}>{totalDijawab}<span style={{ opacity: 0.6, fontSize: 11 }}>/{SOAL.length} dijawab</span></div>
+          <div style={{ fontSize: 12, opacity: 0.7 }}>Dijawab</div>
+          <div style={{ fontSize: 18, fontWeight: 700 }}>{totalDijawab}/{SOAL_AKTIF.length}</div>
+          {pelanggaran > 0 && <div style={{ fontSize: 11, color: "#e74c3c", fontWeight: 700 }}>⚠️ {pelanggaran}/{MAX_PELANGGARAN}</div>}
         </div>
       </div>
-
-      <div style={{ maxWidth: 800, margin: "0 auto", padding: "20px 16px" }}>
-        {/* Tab Bagian */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-          {BAGIAN_LIST.map((b, i) => {
-            const soalB    = SOAL.filter((s) => s.bagian === b);
-            const dijawabB = soalB.filter((s, li) => jawaban[SOAL.findIndex((x) => x === soalB[li])] !== undefined).length;
-            const aktif    = i === bagianAktif;
-            return (
-              <button key={b} onClick={() => setBagianAktif(i)}
-                style={{ flex: 1, padding: "10px 6px", borderRadius: 10, border: aktif ? `2px solid ${WARNA_BAGIAN[b].accent}` : "2px solid #ddd", background: aktif ? WARNA_BAGIAN[b].bg : "#fff", cursor: "pointer", transition: "all 0.2s" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: aktif ? WARNA_BAGIAN[b].accent : "#999" }}>{b}</div>
-                <div style={{ fontSize: 11, color: "#888", marginTop: 2 }}>{dijawabB}/{soalB.length}</div>
-              </button>
-            );
-          })}
+      {/* Banner indikator sesi */}
+      <div style={{ background: sesiAktif === 1 ? "#2980b9" : "#27ae60", color: "#fff", textAlign: "center", padding: "6px", fontSize: 12, fontWeight: 700 }}>
+        SESI {sesiAktif}: {NAMA_SESI.toUpperCase()}
+      </div>
+      {!isFullscreen && !showPeringatan && !didiskualifikasi && (
+        <div style={{ background: "#e74c3c", color: "#fff", textAlign: "center", padding: "10px 16px", fontSize: 13, fontWeight: 600 }}>
+          ⚠️ Kamu keluar dari mode layar penuh!{" "}
+          <span onClick={masukFullscreen} style={{ textDecoration: "underline", cursor: "pointer", fontWeight: 800 }}>Klik di sini untuk kembali</span>
         </div>
-
-        {/* Daftar Soal */}
-        {soalBagian.map((s, li) => {
-          const gi      = indeksGlobal(li);
-          const dipilih = jawaban[gi];
-          const warna   = WARNA_BAGIAN[s.bagian];
-          // Tampilkan teks hanya di soal pertama yang punya teks tersebut
-          const tampilkanTeks = s.teks && (li === 0 || soalBagian[li - 1]?.teksJudul !== s.teksJudul);
+      )}
+      {/* Tab Bagian */}
+      <div style={{ display: "flex", gap: 6, padding: "14px 16px 0", overflowX: "auto" }}>
+        {BAGIAN_LIST_AKTIF.map((b, i) => {
+          const soalB = SOAL_AKTIF.filter((s) => s.bagian === b);
+          const dijawabB = soalB.filter((s, idx) => JAWABAN_AKTIF[SOAL_AKTIF.findIndex((x) => x === s)] !== undefined).length;
+          const aktif = bagianAktif === i;
           return (
-            <div key={gi}>
-              {/* Blok teks bacaan — muncul sekali per teks */}
-              {tampilkanTeks && (
-                <div style={{ background: "#fff", borderRadius: 14, marginBottom: 10, overflow: "hidden", border: `2px solid ${warna.accent}` }}>
-                  <div style={{ background: warna.accent, padding: "10px 18px", display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>📄 {s.teksJudul}</span>
-                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.8)", marginLeft: "auto" }}>Bacalah teks berikut dengan cermat!</span>
-                  </div>
-                  <div style={{ padding: "16px 20px", background: "#fafafa" }}>
-                    {s.teks.split("\n\n").map((par, pi) => (
-                      <p key={pi} style={{ fontSize: 14, color: "#333", lineHeight: 1.8, marginBottom: pi < s.teks.split("\n\n").length - 1 ? 12 : 0, whiteSpace: "pre-line" }}>{par}</p>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {/* Label penghubung jika soal lanjutan dari teks yang sama */}
-              {s.teksJudul && !tampilkanTeks && (
-                <div style={{ marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
-                  <div style={{ height: 1, flex: 1, background: warna.light }} />
-                  <span style={{ fontSize: 11, color: warna.accent, fontWeight: 600 }}>📄 {s.teksJudul}</span>
-                  <div style={{ height: 1, flex: 1, background: warna.light }} />
-                </div>
-              )}
-              {/* Kartu soal */}
-              <div style={{ background: "#fff", borderRadius: 14, marginBottom: 16, overflow: "hidden", boxShadow: dipilih ? `0 0 0 2px ${warna.accent}` : "0 1px 4px rgba(0,0,0,0.08)", transition: "box-shadow 0.2s" }}>
-                <div style={{ background: warna.bg, padding: "12px 18px", borderBottom: `1px solid ${warna.light}`, display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ background: warna.accent, color: "#fff", borderRadius: 8, padding: "2px 10px", fontSize: 12, fontWeight: 700 }}>No. {s.nomor}</span>
-                  <span style={{ fontSize: 12, color: warna.accent, fontWeight: 600 }}>{s.bagian}</span>
-                  {dipilih && <span style={{ marginLeft: "auto", fontSize: 12, color: warna.accent }}>✓ Dijawab</span>}
-                </div>
-                <div style={{ padding: "16px 18px" }}>
-                  <p style={{ fontSize: 15, color: "#222", lineHeight: 1.7, marginBottom: s.gambar ? 12 : 14 }}>{s.soal}</p>
-                  {s.gambar && (
-                    <div style={{ marginBottom: 14, textAlign: "center", background: "#f8f9fa", borderRadius: 10, padding: 10, border: "1px solid #e0e0e0" }}>
-                      <img
-                        src={s.gambar}
-                        alt={"Gambar soal no " + s.nomor}
-                        style={{ maxWidth: "100%", maxHeight: 360, borderRadius: 8, objectFit: "contain", display: "block", margin: "0 auto" }}
-                      />
-                    </div>
-                  )}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <button key={b} onClick={() => setBagianAktif(i)} style={{ padding: "8px 14px", borderRadius: 10, border: aktif ? "2px solid #1a1a2e" : "1.5px solid #ddd", background: aktif ? "#1a1a2e" : "#fff", color: aktif ? "#fff" : "#333", fontWeight: aktif ? 700 : 400, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
+              {b} ({dijawabB}/{soalB.length})
+            </button>
+          );
+        })}
+      </div>
+      {/* Soal */}
+      <div style={{ padding: "12px 16px", maxWidth: 720, margin: "0 auto" }}>
+        {soalBagian.map(({ globalIdx, ...s }) => {
+          const dipilih = JAWABAN_AKTIF[globalIdx];
+          const warna = WARNA_BAGIAN[s.bagian] || { bg: "#f5f5f5", accent: "#333", light: "#eee" };
+          return (
+            <div key={globalIdx} style={{ background: "#fff", borderRadius: 14, marginBottom: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", border: `1.5px solid ${dipilih ? warna.accent : "#e8e8e8"}`, overflow: "hidden" }}>
+              <div style={{ background: warna.bg, padding: "12px 18px", borderBottom: `1px solid ${warna.light}`, display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ background: warna.accent, color: "#fff", borderRadius: 8, padding: "2px 10px", fontSize: 12, fontWeight: 700 }}>No. {s.nomor}</span>
+                <span style={{ fontSize: 12, color: warna.accent, fontWeight: 600 }}>{s.bagian}</span>
+                {dipilih && (
+                  <span style={{ marginLeft: "auto", fontSize: 12, color: warna.accent }}>
+                    {BAGIAN_TANPA_KUNCI.includes(s.bagian) ? "✓ Dipilih" : "✓ Dijawab"}
+                  </span>
+                )}
+                {BAGIAN_TANPA_KUNCI.includes(s.bagian) && (
+                  <span style={{ marginLeft: dipilih ? 4 : "auto", fontSize: 11, background: "#f3e5f5", color: "#8e44ad", borderRadius: 6, padding: "1px 8px" }}>Tidak dinilai</span>
+                )}
+              </div>
+              <div style={{ padding: "16px 18px" }}>
+                <p style={{ fontSize: 15, color: "#222", lineHeight: 1.7, marginBottom: 14 }}>{s.soal}</p>
+                {s.gambar && <img src={s.gambar} alt={`Gambar soal ${s.nomor}`} style={{ width: "100%", maxWidth: 500, borderRadius: 8, marginBottom: 14, border: "1px solid #e0e0e0", display: "block" }} />}
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {s.pilihan.map((p) => {
                     const hrf = p.charAt(0);
                     const terpilih = dipilih === hrf;
                     return (
-                      <button key={p} onClick={() => setJawaban((prev) => ({ ...prev, [gi]: hrf }))}
-                        style={{ textAlign: "left", padding: "10px 14px", borderRadius: 10, border: terpilih ? `2px solid ${warna.accent}` : "1.5px solid #e0e0e0", background: terpilih ? warna.bg : "#fafafa", cursor: "pointer", fontSize: 14, color: terpilih ? warna.accent : "#333", fontWeight: terpilih ? 600 : 400, transition: "all 0.15s" }}>
+                      <button key={p} onClick={() => SET_JAWABAN((prev) => ({ ...prev, [globalIdx]: hrf }))} style={{ textAlign: "left", padding: "10px 14px", borderRadius: 10, border: terpilih ? `2px solid ${warna.accent}` : "1.5px solid #e0e0e0", background: terpilih ? warna.bg : "#fafafa", cursor: "pointer", fontSize: 14, color: terpilih ? warna.accent : "#333", fontWeight: terpilih ? 600 : 400, transition: "all 0.15s" }}>
                         {p}
                       </button>
                     );
                   })}
-                  </div>
                 </div>
               </div>
             </div>
           );
         })}
-
         {/* Navigasi & Submit */}
         <div style={{ display: "flex", gap: 10, marginTop: 8, marginBottom: 32 }}>
           {bagianAktif > 0 && <button onClick={() => setBagianAktif((p) => p - 1)} style={S.btnSec}>← Sebelumnya</button>}
-          {bagianAktif < 2 && <button onClick={() => setBagianAktif((p) => p + 1)} style={{ ...S.btnSec, marginLeft: "auto" }}>Berikutnya →</button>}
-          {bagianAktif === 2 && (
-            <button onClick={() => setKonfirmasi(true)} style={{ ...S.btnPrimary, marginLeft: "auto", width: "auto", padding: "12px 28px" }}>
-              Kumpulkan Jawaban ✓
-            </button>
-          )}
+          {bagianAktif < BAGIAN_LIST_AKTIF.length - 1
+            ? <button onClick={() => setBagianAktif((p) => p + 1)} style={{ ...S.btnPrimary, flex: 1 }}>Bagian Berikutnya →</button>
+            : <button onClick={() => setKonfirmasi(true)} style={{ ...S.btnPrimary, flex: 1, background: sesiAktif === 1 ? "linear-gradient(90deg,#27ae60,#2ecc71)" : "linear-gradient(90deg,#e74c3c,#c0392b)" }}>
+                {sesiAktif === 1 ? "✅ Selesai Sesi 1 & Lihat Skor" : "📤 Kumpulkan Jawaban Sesi 2"}
+              </button>
+          }
         </div>
       </div>
-
-      {/* Modal Konfirmasi Submit */}
-      {konfirmasi && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 20 }}>
-          <div style={{ background: "#fff", borderRadius: 18, padding: 32, maxWidth: 400, width: "100%", textAlign: "center", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
-            <div style={{ fontSize: 48 }}>⚠️</div>
-            <h3 style={{ fontSize: 20, fontWeight: 700, margin: "12px 0 8px", color: "#1a1a2e" }}>Konfirmasi Submit</h3>
-            <p style={S.muted}>Kamu sudah menjawab <strong>{totalDijawab} dari {SOAL.length}</strong> soal.</p>
-            {totalDijawab < SOAL.length && <p style={{ color: "#e74c3c", fontSize: 14, fontWeight: 600 }}>{SOAL.length - totalDijawab} soal belum dijawab!</p>}
-            <p style={{ ...S.muted, fontSize: 13 }}>Setelah dikumpulkan, <strong>tidak bisa diubah lagi</strong>.</p>
-            <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-              <button onClick={() => setKonfirmasi(false)} style={{ ...S.btnSec, flex: 1 }}>Kembali</button>
-              <button onClick={() => { setKonfirmasi(false); kirimKeSheet("Submit manual"); }} disabled={loading}
-                style={{ ...S.btnPrimary, flex: 1, opacity: loading ? 0.7 : 1 }}>
-                {loading ? "Mengirim..." : "Ya, Kumpulkan!"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
-
-const S = {
-  fullCenter: { minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f0f2f5", padding: 20 },
-  card:       { background: "#fff", borderRadius: 20, padding: "36px 32px", width: "100%", maxWidth: 420, boxShadow: "0 8px 32px rgba(0,0,0,0.10)", textAlign: "center" },
-  h2:         { fontSize: 22, fontWeight: 800, color: "#1a1a2e", margin: "8px 0 8px" },
-  muted:      { fontSize: 14, color: "#666", margin: "4px 0" },
-  label:      { display: "block", fontSize: 13, fontWeight: 600, color: "#444", marginBottom: 6, textAlign: "left" },
-  input:      { width: "100%", padding: "11px 14px", borderRadius: 10, border: "1.5px solid #ddd", fontSize: 15, outline: "none", boxSizing: "border-box", background: "#fafafa" },
-  btnPrimary: { width: "100%", padding: 14, borderRadius: 12, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, fontSize: 16, cursor: "pointer", transition: "opacity 0.2s" },
-  btnSec:     { padding: "10px 20px", borderRadius: 10, border: "1.5px solid #ddd", background: "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer", color: "#444" },
-  errorBox:   { background: "#fdecea", color: "#c62828", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 13, textAlign: "left" },
-};
