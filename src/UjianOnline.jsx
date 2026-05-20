@@ -452,8 +452,7 @@ export default function UjianOnline() {
       await fetch(GOOGLE_SCRIPT_URL_TPA + "?" + params.toString(), { method: "GET", mode: "no-cors" });
     } catch (_) {}
     localStorage.setItem(`ujian_submitted_${id.nis}`, JSON.stringify({ nama: id.nama, waktu: new Date().toLocaleString("id-ID") }));
-    setHasilSesi2({ ...skor, perBagian: skorBagian });
-    setLoading(false);
+       setLoading(false);
     setTahap("skorSesi2");
   }, []);
 
