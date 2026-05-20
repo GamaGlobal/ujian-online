@@ -272,10 +272,9 @@ const WARNA_BAGIAN = {
 };
 
 const GOOGLE_SCRIPT_URL_TPB =
-  "https://script.google.com/macros/s/AKfycbyDqPpVv3UWUF9edEwcKtkLcYA-2E5IFGZ4qopgFiPoQU-rw5D9Ulh26Kda8VoEWpKh_Q/exec";
-
+  "hhttps://script.google.com/macros/s/AKfycbxUF9RJcVkkQD0kEVuoPtASOf9ThCnz-mK4txBnBDlMzru73jWI0HvvAdXNKbsvuG5Oxw/exec";
 const GOOGLE_SCRIPT_URL_TPA =
-  "https://script.google.com/macros/s/AKfycbyDqPpVv3UWUF9edEwcKtkLcYA-2E5IFGZ4qopgFiPoQU-rw5D9Ulh26Kda8VoEWpKh_Q/exec";
+  "hhttps://script.google.com/macros/s/AKfycbxUF9RJcVkkQD0kEVuoPtASOf9ThCnz-mK4txBnBDlMzru73jWI0HvvAdXNKbsvuG5Oxw/exec";
 
 function formatWaktu(secs) {
   const m = Math.floor(secs / 60).toString().padStart(2, "0");
@@ -333,6 +332,8 @@ export default function UjianOnline() {
   const [bagianAktif, setBagianAktif] = useState(0);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [hasilSesi1, setHasilSesi1] = useState(null);
+  const [hasilSesi2, setHasilSesi2] = useState(null);
   const [konfirmasi, setKonfirmasi] = useState(false);
   const [pelanggaran, setPelanggaran] = useState(0);
   const [showPeringatan, setShowPeringatan] = useState(false);
@@ -402,20 +403,12 @@ export default function UjianOnline() {
       keterangan: alasan,
     };
     try {
-      const params = new URLSearchParams();
-      Object.entries(payload).forEach(([k, v]) => params.append(k, v ?? ""));
-      await fetch(GOOGLE_SCRIPT_URL_TPB + "?" + params.toString(), { method: "GET", mode: "no-cors" });
+      await fetch(GOOGLE_SCRIPT_URL_TPB, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     } catch (_) {}
+    const minatJawaban = SOAL_TPB.filter(s => s.bagian === "Minat Bakat").map(s => jawabanSesi1Ref.current[SOAL_TPB.indexOf(s)] || "-");
+    setHasilSesi1({ ...skor, perBagian: skorBagian, minatJawaban });
     setLoading(false);
-    // Langsung lanjut ke Sesi 2 tanpa halaman perantara
-    submitDoneRef.current = false;
-    pelanggaranRef.current = 0;
-    setPelanggaran(0);
-    setWaktu(DURATION_SESI);
-    setBagianAktif(0);
-    setSesiAktif(2);
-    document.documentElement.requestFullscreen().catch(() => {});
-    setTahap("pengerjaanSesi2");
+    setTahap("skorSesi1");
   }, []);
 
   // ── Kirim Sesi 2 ke Google Sheet ──
@@ -445,15 +438,13 @@ export default function UjianOnline() {
       membaca_persen: skorBagian["Literasi Membaca"]?.persen ?? "-",
       jawaban: SOAL_TPA.map((s, i) => jawabanSesi2Ref.current[i] || "-").join("|"),
       keterangan: alasan,
-      jumlahPelanggaran: pelanggaranRef.current,
     };
     try {
-      const params = new URLSearchParams();
-      Object.entries(payload).forEach(([k, v]) => params.append(k, v ?? ""));
-      await fetch(GOOGLE_SCRIPT_URL_TPA + "?" + params.toString(), { method: "GET", mode: "no-cors" });
+      await fetch(GOOGLE_SCRIPT_URL_TPA, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     } catch (_) {}
     localStorage.setItem(`ujian_submitted_${id.nis}`, JSON.stringify({ nama: id.nama, waktu: new Date().toLocaleString("id-ID") }));
-       setLoading(false);
+    setHasilSesi2({ ...skor, perBagian: skorBagian });
+    setLoading(false);
     setTahap("skorSesi2");
   }, []);
 
@@ -475,104 +466,42 @@ export default function UjianOnline() {
     return () => clearInterval(timerRef.current);
   }, [tahap, kirimSesi1, kirimSesi2]);
 
-  // ── Anti-cheat Lengkap ──
+  // ── Anti-cheat ──
   useEffect(() => {
     const sedangUjian = tahap === "pengerjaan" || tahap === "pengerjaanSesi2";
     if (!sedangUjian) return;
-
-    // Helper: catat pelanggaran dan diskualifikasi jika melebihi batas
-    const catatPelanggaran = (jenis) => {
+    const tangkapPindahTab = () => {
+      if (!document.hidden) return;
       pelanggaranRef.current += 1;
       const jumlah = pelanggaranRef.current;
       setPelanggaran(jumlah);
       if (jumlah >= MAX_PELANGGARAN) {
         setDidiskualifikasi(true);
         setShowPeringatan(false);
-        if (tahapRef.current === "pengerjaan") kirimSesi1(`Diskualifikasi - ${jenis} ${jumlah}x`);
-        else kirimSesi2(`Diskualifikasi - ${jenis} ${jumlah}x`);
+        if (tahapRef.current === "pengerjaan") kirimSesi1(`Diskualifikasi - pindah tab ${jumlah}x`);
+        else kirimSesi2(`Diskualifikasi - pindah tab ${jumlah}x`);
       } else {
-        setPesanPeringatan(
-          `⚠️ Terdeteksi: ${jenis}\n\nIni adalah pelanggaran ke-${jumlah} dari ${MAX_PELANGGARAN}.\nJika mencapai ${MAX_PELANGGARAN}x, jawaban otomatis dikumpulkan dan kamu DISKUALIFIKASI.`
-        );
+        setPesanPeringatan(`Kamu terdeteksi meninggalkan halaman ujian!\n\nIni adalah pelanggaran ke-${jumlah} dari ${MAX_PELANGGARAN}.\nJika mencapai ${MAX_PELANGGARAN}x, jawaban otomatis dikumpulkan dan kamu DISKUALIFIKASI.`);
         setShowPeringatan(true);
       }
     };
-
-    // 1. Deteksi pindah tab / minimize (visibilitychange)
-    const tangkapPindahTab = () => {
-      if (!document.hidden) return;
-      catatPelanggaran("pindah tab/minimize");
-    };
-
-    // 2. Deteksi window blur (pindah aplikasi / klik luar browser)
-    const tangkapBlur = () => {
-      // Hanya catat jika dokumen benar-benar tidak aktif
-      setTimeout(() => {
-        if (document.hidden) return; // sudah ditangkap visibilitychange
-        catatPelanggaran("pindah jendela");
-      }, 300);
-    };
-
-    // 3. Blokir klik kanan
     const blokKanan = (e) => e.preventDefault();
-
-    // 4. Blokir shortcut keyboard
     const blokKeyboard = (e) => {
       const k = e.key.toLowerCase();
-      const ctrl = e.ctrlKey || e.metaKey;
-      const shift = e.shiftKey;
-      // F12, F5 (reload), F11 (fullscreen toggle)
-      if (["f12", "f5"].includes(k)) { e.preventDefault(); e.stopPropagation(); return; }
-      // Ctrl+U (view source), Ctrl+S (save), Ctrl+P (print)
-      if (ctrl && ["u", "s", "p"].includes(k)) { e.preventDefault(); e.stopPropagation(); return; }
-      // Ctrl+Shift+I/J/C/K (DevTools), Ctrl+Shift+U (Linux view source)
-      if (ctrl && shift && ["i", "j", "c", "k", "u"].includes(k)) { e.preventDefault(); e.stopPropagation(); return; }
-      // Ctrl+A (select all), Ctrl+C (copy), Ctrl+X (cut), Ctrl+V (paste)
-      if (ctrl && ["a", "c", "x", "v"].includes(k)) { e.preventDefault(); e.stopPropagation(); return; }
-      // Alt+Tab (Windows switch window)
-      if (e.altKey && k === "tab") { e.preventDefault(); e.stopPropagation(); return; }
-      // Print Screen
-      if (k === "printscreen" || k === "sysrq") { e.preventDefault(); e.stopPropagation(); return; }
-      // Windows key
-      if (k === "meta" || k === "os") { e.preventDefault(); e.stopPropagation(); return; }
+      if (e.key === "F12" || (e.ctrlKey && k === "u") || (e.ctrlKey && e.shiftKey && ["i","j","c","k"].includes(k)) || (e.ctrlKey && k === "s") || (e.ctrlKey && k === "p") || (e.altKey && k === "tab")) { e.preventDefault(); e.stopPropagation(); }
     };
-
-    // 5. Blokir copy, cut, paste di semua elemen
-    const blokClipboard = (e) => e.preventDefault();
-
-    // 6. Blokir drag (untuk mencegah drag teks)
-    const blokDrag = (e) => e.preventDefault();
-
-    // 7. Blokir select all via mouse
-    const blokSelectStart = (e) => {
-      // Izinkan select pada input/textarea agar bisa mengisi form identitas
-      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-      e.preventDefault();
-    };
-
-    // Daftarkan semua event listener
+    const blokCopy = (e) => e.preventDefault();
     document.addEventListener("visibilitychange", tangkapPindahTab);
-    window.addEventListener("blur", tangkapBlur);
     document.addEventListener("contextmenu", blokKanan);
-    document.addEventListener("keydown", blokKeyboard, true);
-    document.addEventListener("copy", blokClipboard);
-    document.addEventListener("cut", blokClipboard);
-    document.addEventListener("paste", blokClipboard);
-    document.addEventListener("drag", blokDrag);
-    document.addEventListener("dragstart", blokDrag);
-    document.addEventListener("selectstart", blokSelectStart);
-
+    document.addEventListener("keydown", blokKeyboard);
+    document.addEventListener("copy", blokCopy);
+    document.addEventListener("cut", blokCopy);
     return () => {
       document.removeEventListener("visibilitychange", tangkapPindahTab);
-      window.removeEventListener("blur", tangkapBlur);
       document.removeEventListener("contextmenu", blokKanan);
-      document.removeEventListener("keydown", blokKeyboard, true);
-      document.removeEventListener("copy", blokClipboard);
-      document.removeEventListener("cut", blokClipboard);
-      document.removeEventListener("paste", blokClipboard);
-      document.removeEventListener("drag", blokDrag);
-      document.removeEventListener("dragstart", blokDrag);
-      document.removeEventListener("selectstart", blokSelectStart);
+      document.removeEventListener("keydown", blokKeyboard);
+      document.removeEventListener("copy", blokCopy);
+      document.removeEventListener("cut", blokCopy);
     };
   }, [tahap, kirimSesi1, kirimSesi2]);
 
@@ -598,7 +527,17 @@ export default function UjianOnline() {
     setTahap("pengerjaan");
   };
 
-  
+  const lanjutSesi2 = () => {
+    submitDoneRef.current = false;
+    pelanggaranRef.current = 0;
+    setPelanggaran(0);
+    setWaktu(DURATION_SESI);
+    setBagianAktif(0);
+    setSesiAktif(2);
+    document.documentElement.requestFullscreen().catch(() => {});
+    setTahap("pengerjaanSesi2");
+  };
+
   const SOAL_AKTIF = sesiAktif === 1 ? SOAL_TPB : SOAL_TPA;
   const BAGIAN_LIST_AKTIF = sesiAktif === 1 ? BAGIAN_LIST_TPB : BAGIAN_LIST_TPA;
   const JAWABAN_AKTIF = sesiAktif === 1 ? jawabanSesi1 : jawabanSesi2;
@@ -650,10 +589,8 @@ export default function UjianOnline() {
           </div>
           <div style={{ background: "#fdecea", border: "1px solid #ffcdd2", borderRadius: 10, padding: "12px 16px", marginBottom: 20, fontSize: 13, color: "#b71c1c", lineHeight: 1.6 }}>
             🔒 Ujian berjalan dalam <strong>mode layar penuh</strong>.<br />
-            ❌ Dilarang: pindah tab, pindah aplikasi, minimize, klik kanan.<br />
-            ❌ Dilarang: copy, cut, paste, drag teks, Print Screen.<br />
-            ❌ Dilarang: Ctrl+C/V/A/U/S/P, F12, DevTools.<br />
-            Pelanggaran <strong>{MAX_PELANGGARAN}x</strong> → jawaban otomatis dikumpulkan & DISKUALIFIKASI.
+            Dilarang: pindah tab, minimize, klik kanan, copy-paste.<br />
+            Pelanggaran <strong>{MAX_PELANGGARAN}x</strong> → DISKUALIFIKASI.
           </div>
           <button style={S.btnPrimary} onClick={mulaiUjian}>Mulai Ujian (Layar Penuh) →</button>
         </div>
@@ -672,28 +609,150 @@ export default function UjianOnline() {
       </div>
     );
 
-  // ── RENDER: Selesai Total (tanpa tampilkan skor) ──
+  // ── RENDER: Skor Sesi 1 ──
+  if (tahap === "skorSesi1")
+    return (
+      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg,#1a1a2e,#16213e)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+        <div style={{ ...S.card, textAlign: "center", maxWidth: 500 }}>
+          <div style={{ fontSize: 48, marginBottom: 8 }}>✅</div>
+          <h2 style={{ color: "#27ae60", fontSize: 22, marginBottom: 4 }}>Sesi 1 Selesai!</h2>
+          <p style={{ color: "#555", marginBottom: 16 }}>Tes Potensi Belajar (TPB)</p>
+          {/* Skor total */}
+          <div style={{ background: "#eafaf1", borderRadius: 14, padding: "16px", marginBottom: 16 }}>
+            <div style={{ fontSize: 13, color: "#555", marginBottom: 4 }}>Skor Total (Materi Akademik)</div>
+            <div style={{ fontSize: 48, fontWeight: 800, color: "#27ae60" }}>{hasilSesi1?.persen}%</div>
+            <div style={{ fontSize: 14, color: "#555" }}>{hasilSesi1?.benar} / {hasilSesi1?.total} soal benar</div>
+          </div>
+          {/* Skor per bagian */}
+          <div style={{ textAlign: "left", marginBottom: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#333", marginBottom: 8 }}>Rincian per Bagian:</div>
+            {["Kemampuan Verbal", "Kemampuan Numerik", "Penalaran Logis"].map((b) => {
+              const d = hasilSesi1?.perBagian?.[b];
+              if (!d) return null;
+              return (
+                <div key={b} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "#f8f9fa", borderRadius: 8, marginBottom: 6 }}>
+                  <span style={{ fontSize: 13, color: "#333" }}>{b}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#2980b9" }}>{d.benar}/{d.total} ({d.persen}%)</span>
+                </div>
+              );
+            })}
+            {/* Kepribadian — tidak dinilai */}
+            {(() => {
+              const d = hasilSesi1?.perBagian?.["Kepribadian & Minat Bakat"];
+              if (!d) return null;
+              return (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "#f3e5f5", borderRadius: 8, marginBottom: 6 }}>
+                  <span style={{ fontSize: 13, color: "#333" }}>Kepribadian</span>
+                  <span style={{ fontSize: 12, color: "#8e44ad", fontWeight: 600 }}>{d.dijawab}/{d.total} dijawab • Tidak dinilai</span>
+                </div>
+              );
+            })()}
+            {/* Minat Bakat 40 soal — tampilkan profil dominan */}
+            {(() => {
+              const d = hasilSesi1?.perBagian?.["Minat Bakat"];
+              if (!d) return null;
+              // Hitung profil dari jawaban
+              const minatSoal = (hasilSesi1?.minatJawaban || []);
+              const profil = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+              minatSoal.forEach(j => { if (profil[j] !== undefined) profil[j]++; });
+              const labelProfil = { A: "Investigatif", B: "Sosial", C: "Artistik", D: "Teknis", E: "Kinestetik" };
+              const dominan = Object.entries(profil).sort((a, b) => b[1] - a[1])[0];
+              return (
+                <div style={{ padding: "10px 12px", background: "#fff8e1", borderRadius: 8, marginBottom: 6, border: "1px solid #ffe082" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                    <span style={{ fontSize: 13, color: "#333", fontWeight: 600 }}>Minat Bakat</span>
+                    <span style={{ fontSize: 12, color: "#f39c12" }}>{d.dijawab}/{d.total} dijawab</span>
+                  </div>
+                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                    {Object.entries(profil).map(([k, v]) => (
+                      <span key={k} style={{ fontSize: 11, padding: "2px 8px", borderRadius: 6, background: dominan && dominan[0] === k ? "#f39c12" : "#f5f5f5", color: dominan && dominan[0] === k ? "#fff" : "#555", fontWeight: dominan && dominan[0] === k ? 700 : 400 }}>
+                        {labelProfil[k]}: {v}
+                      </span>
+                    ))}
+                  </div>
+                  {dominan && <div style={{ marginTop: 6, fontSize: 12, color: "#795548" }}>Profil dominan: <strong>{labelProfil[dominan[0]]}</strong></div>}
+                </div>
+              );
+            })()}
+          </div>
+          <div style={{ background: "#e8f4fd", border: "1px solid #d0e8f8", borderRadius: 10, padding: "14px 16px", marginBottom: 20, fontSize: 14, color: "#2980b9" }}>
+            🎯 Lanjutkan ke <strong>Sesi 2: Tes Potensi Akademik (TPA)</strong><br />
+            <span style={{ fontSize: 12, color: "#555" }}>Waktu: 60 menit • {SOAL_TPA.length} soal</span>
+          </div>
+          <button style={{ ...S.btnPrimary, background: "linear-gradient(90deg,#27ae60,#2ecc71)" }} onClick={lanjutSesi2}>
+            Lanjut Sesi 2: TPA →
+          </button>
+        </div>
+      </div>
+    );
+
+  // ── RENDER: Skor Sesi 2 (Selesai Total) ──
   if (tahap === "skorSesi2")
     return (
       <div style={{ minHeight: "100vh", background: "linear-gradient(135deg,#1a1a2e,#16213e)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-        <div style={{ ...S.card, textAlign: "center", maxWidth: 420 }}>
-          <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
-          <h2 style={{ color: "#f39c12", fontSize: 24, marginBottom: 8 }}>Ujian Selesai!</h2>
-          <p style={{ color: "#444", fontSize: 15, marginBottom: 4 }}>
-            Terima kasih, <strong>{identitas.nama}</strong>.
-          </p>
-          <p style={{ color: "#666", fontSize: 14, marginBottom: 28 }}>
-            Seluruh jawaban kamu sudah berhasil dikirim ke panitia.
-          </p>
-          <div style={{ background: "#f8f9fa", borderRadius: 12, padding: "16px 20px", marginBottom: 24, textAlign: "left", fontSize: 13, color: "#555", lineHeight: 1.7 }}>
-            <div style={{ marginBottom: 6 }}>📋 <strong>Nama:</strong> {identitas.nama}</div>
-            <div style={{ marginBottom: 6 }}>🏫 <strong>Kelas:</strong> {identitas.kelas}</div>
-            <div style={{ marginBottom: 6 }}>🆔 <strong>NIS:</strong> {identitas.nis}</div>
-            <div>⏰ <strong>Waktu selesai:</strong> {new Date().toLocaleString("id-ID")}</div>
+        <div style={{ ...S.card, textAlign: "center", maxWidth: 520 }}>
+          <div style={{ fontSize: 48, marginBottom: 8 }}>🎉</div>
+          <h2 style={{ color: "#f39c12", fontSize: 22, marginBottom: 4 }}>Ujian Selesai!</h2>
+          <p style={{ color: "#555", marginBottom: 16 }}>Terima kasih, <strong>{identitas.nama}</strong>. Berikut rekap nilaimu:</p>
+          {/* Rekap skor 2 sesi */}
+          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+            <div style={{ flex: 1, background: "#eafaf1", borderRadius: 14, padding: "14px" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#27ae60", marginBottom: 4 }}>Sesi 1 — TPB</div>
+              <div style={{ fontSize: 32, fontWeight: 800, color: "#27ae60" }}>{hasilSesi1?.persen}%</div>
+              <div style={{ fontSize: 11, color: "#555" }}>{hasilSesi1?.benar}/{hasilSesi1?.total} benar</div>
+            </div>
+            <div style={{ flex: 1, background: "#e8f4fd", borderRadius: 14, padding: "14px" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#2980b9", marginBottom: 4 }}>Sesi 2 — TPA</div>
+              <div style={{ fontSize: 32, fontWeight: 800, color: "#2980b9" }}>{hasilSesi2?.persen}%</div>
+              <div style={{ fontSize: 11, color: "#555" }}>{hasilSesi2?.benar}/{hasilSesi2?.total} benar</div>
+            </div>
           </div>
-          <div style={{ background: "#fff8e1", border: "1px solid #ffe082", borderRadius: 12, padding: "14px 16px", fontSize: 13, color: "#795548" }}>
-            📢 Hasil ujian akan diumumkan oleh panitia pada waktu yang telah ditentukan.
+          {/* Rincian TPB */}
+          <div style={{ textAlign: "left", marginBottom: 12 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#27ae60", marginBottom: 6 }}>📊 Rincian TPB:</div>
+            {["Kemampuan Verbal", "Kemampuan Numerik", "Penalaran Logis"].map((b) => {
+              const d = hasilSesi1?.perBagian?.[b];
+              if (!d) return null;
+              return (
+                <div key={b} style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: "#f8f9fa", borderRadius: 8, marginBottom: 4, fontSize: 12 }}>
+                  <span style={{ color: "#333" }}>{b}</span>
+                  <span style={{ fontWeight: 700, color: "#27ae60" }}>{d.benar}/{d.total} ({d.persen}%)</span>
+                </div>
+              );
+            })}
+            {(() => {
+              const d = hasilSesi1?.perBagian?.["Kepribadian & Minat Bakat"];
+              if (!d) return null;
+              return (
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: "#f3e5f5", borderRadius: 8, marginBottom: 4, fontSize: 12 }}>
+                  <span style={{ color: "#333" }}>Kepribadian & Minat Bakat</span>
+                  <span style={{ color: "#8e44ad" }}>{d.dijawab}/{d.total} dijawab</span>
+                </div>
+              );
+            })()}
           </div>
+          {/* Rincian TPA */}
+          <div style={{ textAlign: "left", marginBottom: 16 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#2980b9", marginBottom: 6 }}>📊 Rincian TPA:</div>
+            {["Penalaran Matematika", "Literasi Keislaman", "Literasi Membaca"].map((b) => {
+              const d = hasilSesi2?.perBagian?.[b];
+              if (!d) return null;
+              return (
+                <div key={b} style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: "#f8f9fa", borderRadius: 8, marginBottom: 4, fontSize: 12 }}>
+                  <span style={{ color: "#333" }}>{b}</span>
+                  <span style={{ fontWeight: 700, color: "#2980b9" }}>{d.benar}/{d.total} ({d.persen}%)</span>
+                </div>
+              );
+            })}
+          </div>
+          {/* Rata-rata */}
+          <div style={{ background: "#fff8e1", borderRadius: 12, padding: "12px", marginBottom: 12 }}>
+            <div style={{ fontSize: 12, color: "#795548" }}>Rata-rata Nilai Akademik</div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: "#f39c12" }}>
+              {Math.round(((hasilSesi1?.persen || 0) + (hasilSesi2?.persen || 0)) / 2)}%
+            </div>
+          </div>
+          <p style={{ fontSize: 12, color: "#888" }}>Jawaban telah dikirim. Hasil dapat dilihat dari panitia.</p>
         </div>
       </div>
     );
