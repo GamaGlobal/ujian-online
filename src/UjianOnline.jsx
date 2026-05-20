@@ -119,7 +119,7 @@ const SOAL_TPB = [
 // ══════════════════════════════════════
 // SOAL SESI 2: TES POTENSI AKADEMIK (TPA)
 // ══════════════════════════════════════
-const SOAL = [
+const SOAL_TPA = [
   { bagian: "Penalaran Matematika", nomor: 1, soal: "Ikram membuat spageti panggang lumer dengan perbandingan massa spageti : adonan saus tomat : keju lumer = 4 : 4 : 2. Jika total massa spageti panggang lumer adalah 2.270 gram, berapakah total massa saus tomat dan keju lumer? (dalam gram)", pilihan: ["A. 1.336", "B. 2.337", "C. 1.337", "D. 2.227"], kunci: "A" },
   { bagian: "Penalaran Matematika", nomor: 2, soal: "Seorang tukang jahit mampu menjahit 60 potong kaos dalam 3 hari. Bila ia bekerja selama 2 minggu, berapa potong kaos yang dapat ia kerjakan?", pilihan: ["A. 210 potong", "B. 140 potong", "C. 280 potong", "D. 350 potong"], kunci: "C" },
   { bagian: "Penalaran Matematika", nomor: 3, soal: "Populasi sapi di kota P adalah 1.600 ekor (naik 25/bulan) dan kota Q 500 ekor (naik 10/bulan). Saat populasi kota P tiga kali kota Q, berapa populasi sapi di kota P?", pilihan: ["A. 2.250", "B. 2.400", "C. 2.100", "D. 1.900"], kunci: "A" },
