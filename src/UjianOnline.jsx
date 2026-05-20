@@ -597,17 +597,7 @@ export default function UjianOnline() {
     setTahap("pengerjaan");
   };
 
-  const lanjutSesi2 = () => {
-    submitDoneRef.current = false;
-    pelanggaranRef.current = 0;
-    setPelanggaran(0);
-    setWaktu(DURATION_SESI);
-    setBagianAktif(0);
-    setSesiAktif(2);
-    document.documentElement.requestFullscreen().catch(() => {});
-    setTahap("pengerjaanSesi2");
-  };
-
+  
   const SOAL_AKTIF = sesiAktif === 1 ? SOAL_TPB : SOAL_TPA;
   const BAGIAN_LIST_AKTIF = sesiAktif === 1 ? BAGIAN_LIST_TPB : BAGIAN_LIST_TPA;
   const JAWABAN_AKTIF = sesiAktif === 1 ? jawabanSesi1 : jawabanSesi2;
