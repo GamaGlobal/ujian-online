@@ -272,9 +272,9 @@ const WARNA_BAGIAN = {
 };
 
 const GOOGLE_SCRIPT_URL_TPB =
-  "hhttps://script.google.com/macros/s/AKfycbxUF9RJcVkkQD0kEVuoPtASOf9ThCnz-mK4txBnBDlMzru73jWI0HvvAdXNKbsvuG5Oxw/exec";
+  "https://script.google.com/macros/s/AKfycbwBsRf459Bi7Rc4kzK-4OrGGPlscNILBo6G-nFgDFvBP2jvJ8kq2r2LrLnbtIen_ma8CQ/exec";
 const GOOGLE_SCRIPT_URL_TPA =
-  "hhttps://script.google.com/macros/s/AKfycbxUF9RJcVkkQD0kEVuoPtASOf9ThCnz-mK4txBnBDlMzru73jWI0HvvAdXNKbsvuG5Oxw/exec";
+  "https://script.google.com/macros/s/AKfycbwBsRf459Bi7Rc4kzK-4OrGGPlscNILBo6G-nFgDFvBP2jvJ8kq2r2LrLnbtIen_ma8CQ/exec";
 
 function formatWaktu(secs) {
   const m = Math.floor(secs / 60).toString().padStart(2, "0");
