@@ -332,8 +332,6 @@ export default function UjianOnline() {
   const [bagianAktif, setBagianAktif] = useState(0);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [hasilSesi1, setHasilSesi1] = useState(null);
-  const [hasilSesi2, setHasilSesi2] = useState(null);
   const [konfirmasi, setKonfirmasi] = useState(false);
   const [pelanggaran, setPelanggaran] = useState(0);
   const [showPeringatan, setShowPeringatan] = useState(false);
