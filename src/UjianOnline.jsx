@@ -617,63 +617,13 @@ export default function UjianOnline() {
           <div style={{ fontSize: 48, marginBottom: 8 }}>✅</div>
           <h2 style={{ color: "#27ae60", fontSize: 22, marginBottom: 4 }}>Sesi 1 Selesai!</h2>
           <p style={{ color: "#555", marginBottom: 16 }}>Tes Potensi Belajar (TPB)</p>
-          {/* Skor total */}
-          <div style={{ background: "#eafaf1", borderRadius: 14, padding: "16px", marginBottom: 16 }}>
-            <div style={{ fontSize: 13, color: "#555", marginBottom: 4 }}>Skor Total (Materi Akademik)</div>
-            <div style={{ fontSize: 48, fontWeight: 800, color: "#27ae60" }}>{hasilSesi1?.persen}%</div>
-            <div style={{ fontSize: 14, color: "#555" }}>{hasilSesi1?.benar} / {hasilSesi1?.total} soal benar</div>
-          </div>
-          {/* Skor per bagian */}
-          <div style={{ textAlign: "left", marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "#333", marginBottom: 8 }}>Rincian per Bagian:</div>
-            {["Kemampuan Verbal", "Kemampuan Numerik", "Penalaran Logis"].map((b) => {
-              const d = hasilSesi1?.perBagian?.[b];
-              if (!d) return null;
-              return (
-                <div key={b} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "#f8f9fa", borderRadius: 8, marginBottom: 6 }}>
-                  <span style={{ fontSize: 13, color: "#333" }}>{b}</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#2980b9" }}>{d.benar}/{d.total} ({d.persen}%)</span>
-                </div>
-              );
-            })}
-            {/* Kepribadian — tidak dinilai */}
-            {(() => {
-              const d = hasilSesi1?.perBagian?.["Kepribadian & Minat Bakat"];
-              if (!d) return null;
-              return (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "#f3e5f5", borderRadius: 8, marginBottom: 6 }}>
-                  <span style={{ fontSize: 13, color: "#333" }}>Kepribadian</span>
-                  <span style={{ fontSize: 12, color: "#8e44ad", fontWeight: 600 }}>{d.dijawab}/{d.total} dijawab • Tidak dinilai</span>
-                </div>
-              );
-            })()}
-            {/* Minat Bakat 40 soal — tampilkan profil dominan */}
-            {(() => {
-              const d = hasilSesi1?.perBagian?.["Minat Bakat"];
-              if (!d) return null;
-              // Hitung profil dari jawaban
-              const minatSoal = (hasilSesi1?.minatJawaban || []);
-              const profil = { A: 0, B: 0, C: 0, D: 0, E: 0 };
-              minatSoal.forEach(j => { if (profil[j] !== undefined) profil[j]++; });
-              const labelProfil = { A: "Investigatif", B: "Sosial", C: "Artistik", D: "Teknis", E: "Kinestetik" };
-              const dominan = Object.entries(profil).sort((a, b) => b[1] - a[1])[0];
-              return (
-                <div style={{ padding: "10px 12px", background: "#fff8e1", borderRadius: 8, marginBottom: 6, border: "1px solid #ffe082" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                    <span style={{ fontSize: 13, color: "#333", fontWeight: 600 }}>Minat Bakat</span>
-                    <span style={{ fontSize: 12, color: "#f39c12" }}>{d.dijawab}/{d.total} dijawab</span>
-                  </div>
-                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                    {Object.entries(profil).map(([k, v]) => (
-                      <span key={k} style={{ fontSize: 11, padding: "2px 8px", borderRadius: 6, background: dominan && dominan[0] === k ? "#f39c12" : "#f5f5f5", color: dominan && dominan[0] === k ? "#fff" : "#555", fontWeight: dominan && dominan[0] === k ? 700 : 400 }}>
-                        {labelProfil[k]}: {v}
-                      </span>
-                    ))}
-                  </div>
-                  {dominan && <div style={{ marginTop: 6, fontSize: 12, color: "#795548" }}>Profil dominan: <strong>{labelProfil[dominan[0]]}</strong></div>}
-                </div>
-              );
-            })()}
+          <div style={{ background: "#eafaf1", borderRadius: 14, padding: "24px 16px", marginBottom: 20 }}>
+            <div style={{ fontSize: 36, marginBottom: 10 }}>📨</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#27ae60", marginBottom: 8 }}>Jawaban Sesi 1 Berhasil Dikirim</div>
+            <div style={{ fontSize: 13, color: "#555", lineHeight: 1.7 }}>
+              Jawaban kamu telah tercatat dengan baik.<br />
+              Hasil nilai dapat dilihat dari panitia.
+            </div>
           </div>
           <div style={{ background: "#e8f4fd", border: "1px solid #d0e8f8", borderRadius: 10, padding: "14px 16px", marginBottom: 20, fontSize: 14, color: "#2980b9" }}>
             🎯 Lanjutkan ke <strong>Sesi 2: Tes Potensi Akademik (TPA)</strong><br />
@@ -693,66 +643,28 @@ export default function UjianOnline() {
         <div style={{ ...S.card, textAlign: "center", maxWidth: 520 }}>
           <div style={{ fontSize: 48, marginBottom: 8 }}>🎉</div>
           <h2 style={{ color: "#f39c12", fontSize: 22, marginBottom: 4 }}>Ujian Selesai!</h2>
-          <p style={{ color: "#555", marginBottom: 16 }}>Terima kasih, <strong>{identitas.nama}</strong>. Berikut rekap nilaimu:</p>
-          {/* Rekap skor 2 sesi */}
-          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-            <div style={{ flex: 1, background: "#eafaf1", borderRadius: 14, padding: "14px" }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#27ae60", marginBottom: 4 }}>Sesi 1 — TPB</div>
-              <div style={{ fontSize: 32, fontWeight: 800, color: "#27ae60" }}>{hasilSesi1?.persen}%</div>
-              <div style={{ fontSize: 11, color: "#555" }}>{hasilSesi1?.benar}/{hasilSesi1?.total} benar</div>
+          <p style={{ color: "#555", marginBottom: 20 }}>Terima kasih, <strong>{identitas.nama}</strong>. Semua jawaban telah berhasil dikirim.</p>
+          <div style={{ background: "#eafaf1", borderRadius: 14, padding: "24px 16px", marginBottom: 20 }}>
+            <div style={{ fontSize: 40, marginBottom: 10 }}>📋</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#27ae60", marginBottom: 8 }}>Kedua Sesi Berhasil Diselesaikan</div>
+            <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
+              <div style={{ flex: 1, background: "#fff", borderRadius: 10, padding: "12px 8px", border: "1.5px solid #d4efdf" }}>
+                <div style={{ fontSize: 20, marginBottom: 4 }}>✅</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#27ae60" }}>Sesi 1 — TPB</div>
+                <div style={{ fontSize: 11, color: "#555", marginTop: 4 }}>Jawaban terkirim</div>
+              </div>
+              <div style={{ flex: 1, background: "#fff", borderRadius: 10, padding: "12px 8px", border: "1.5px solid #aed6f1" }}>
+                <div style={{ fontSize: 20, marginBottom: 4 }}>✅</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#2980b9" }}>Sesi 2 — TPA</div>
+                <div style={{ fontSize: 11, color: "#555", marginTop: 4 }}>Jawaban terkirim</div>
+              </div>
             </div>
-            <div style={{ flex: 1, background: "#e8f4fd", borderRadius: 14, padding: "14px" }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#2980b9", marginBottom: 4 }}>Sesi 2 — TPA</div>
-              <div style={{ fontSize: 32, fontWeight: 800, color: "#2980b9" }}>{hasilSesi2?.persen}%</div>
-              <div style={{ fontSize: 11, color: "#555" }}>{hasilSesi2?.benar}/{hasilSesi2?.total} benar</div>
-            </div>
-          </div>
-          {/* Rincian TPB */}
-          <div style={{ textAlign: "left", marginBottom: 12 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: "#27ae60", marginBottom: 6 }}>📊 Rincian TPB:</div>
-            {["Kemampuan Verbal", "Kemampuan Numerik", "Penalaran Logis"].map((b) => {
-              const d = hasilSesi1?.perBagian?.[b];
-              if (!d) return null;
-              return (
-                <div key={b} style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: "#f8f9fa", borderRadius: 8, marginBottom: 4, fontSize: 12 }}>
-                  <span style={{ color: "#333" }}>{b}</span>
-                  <span style={{ fontWeight: 700, color: "#27ae60" }}>{d.benar}/{d.total} ({d.persen}%)</span>
-                </div>
-              );
-            })}
-            {(() => {
-              const d = hasilSesi1?.perBagian?.["Kepribadian & Minat Bakat"];
-              if (!d) return null;
-              return (
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: "#f3e5f5", borderRadius: 8, marginBottom: 4, fontSize: 12 }}>
-                  <span style={{ color: "#333" }}>Kepribadian & Minat Bakat</span>
-                  <span style={{ color: "#8e44ad" }}>{d.dijawab}/{d.total} dijawab</span>
-                </div>
-              );
-            })()}
-          </div>
-          {/* Rincian TPA */}
-          <div style={{ textAlign: "left", marginBottom: 16 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: "#2980b9", marginBottom: 6 }}>📊 Rincian TPA:</div>
-            {["Penalaran Matematika", "Literasi Keislaman", "Literasi Membaca"].map((b) => {
-              const d = hasilSesi2?.perBagian?.[b];
-              if (!d) return null;
-              return (
-                <div key={b} style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: "#f8f9fa", borderRadius: 8, marginBottom: 4, fontSize: 12 }}>
-                  <span style={{ color: "#333" }}>{b}</span>
-                  <span style={{ fontWeight: 700, color: "#2980b9" }}>{d.benar}/{d.total} ({d.persen}%)</span>
-                </div>
-              );
-            })}
-          </div>
-          {/* Rata-rata */}
-          <div style={{ background: "#fff8e1", borderRadius: 12, padding: "12px", marginBottom: 12 }}>
-            <div style={{ fontSize: 12, color: "#795548" }}>Rata-rata Nilai Akademik</div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: "#f39c12" }}>
-              {Math.round(((hasilSesi1?.persen || 0) + (hasilSesi2?.persen || 0)) / 2)}%
+            <div style={{ fontSize: 13, color: "#555", lineHeight: 1.7 }}>
+              Seluruh jawaban kamu telah tercatat dengan baik.<br />
+              Hasil nilai dapat dilihat dari panitia.
             </div>
           </div>
-          <p style={{ fontSize: 12, color: "#888" }}>Jawaban telah dikirim. Hasil dapat dilihat dari panitia.</p>
+          <p style={{ fontSize: 12, color: "#888" }}>Kamu dapat menutup halaman ini.</p>
         </div>
       </div>
     );
@@ -885,7 +797,7 @@ export default function UjianOnline() {
           {bagianAktif < BAGIAN_LIST_AKTIF.length - 1
             ? <button onClick={() => setBagianAktif((p) => p + 1)} style={{ ...S.btnPrimary, flex: 1 }}>Bagian Berikutnya →</button>
             : <button onClick={() => setKonfirmasi(true)} style={{ ...S.btnPrimary, flex: 1, background: sesiAktif === 1 ? "linear-gradient(90deg,#27ae60,#2ecc71)" : "linear-gradient(90deg,#e74c3c,#c0392b)" }}>
-                {sesiAktif === 1 ? "✅ Selesai Sesi 1 & Lihat Skor" : "📤 Kumpulkan Jawaban Sesi 2"}
+                {sesiAktif === 1 ? "✅ Selesai Sesi 1" : "📤 Kumpulkan Jawaban Sesi 2"}
               </button>
           }
         </div>
