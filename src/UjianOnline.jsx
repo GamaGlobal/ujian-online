@@ -403,7 +403,6 @@ export default function UjianOnline() {
     try {
       await fetch(GOOGLE_SCRIPT_URL_TPB, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     } catch (_) {}
-    const minatJawaban = SOAL_TPB.filter(s => s.bagian === "Minat Bakat").map(s => jawabanSesi1Ref.current[SOAL_TPB.indexOf(s)] || "-");
     setLoading(false);
     setTahap("skorSesi1");
   }, []);
