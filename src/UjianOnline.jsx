@@ -404,7 +404,6 @@ export default function UjianOnline() {
       await fetch(GOOGLE_SCRIPT_URL_TPB, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     } catch (_) {}
     const minatJawaban = SOAL_TPB.filter(s => s.bagian === "Minat Bakat").map(s => jawabanSesi1Ref.current[SOAL_TPB.indexOf(s)] || "-");
-    setHasilSesi1({ ...skor, perBagian: skorBagian, minatJawaban });
     setLoading(false);
     setTahap("skorSesi1");
   }, []);
@@ -441,7 +440,6 @@ export default function UjianOnline() {
       await fetch(GOOGLE_SCRIPT_URL_TPA, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     } catch (_) {}
     localStorage.setItem(`ujian_submitted_${id.nis}`, JSON.stringify({ nama: id.nama, waktu: new Date().toLocaleString("id-ID") }));
-    setHasilSesi2({ ...skor, perBagian: skorBagian });
     setLoading(false);
     setTahap("skorSesi2");
   }, []);
