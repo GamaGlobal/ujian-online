@@ -9,11 +9,11 @@ const MAX_PELANGGARAN = 3;
 const SOAL_TPB = [
   // BAGIAN I: KEMAMPUAN VERBAL
   { bagian: "Kemampuan Verbal", nomor: 1, soal: "Penulisan partikel dalam kalimat berikut ini yang benar adalah ..", pilihan: ["A. Apa kah aku boleh memakan buahmu?", "B. Murid memasuki ruangan satu persatu", "C. Apa pun yang dia inginkan selalu terpenuhi.", "D. Ada pun penyebab kemacetan itu belum diketahui."], kunci: "C" },
-  { bagian: "Kemampuan Verbal", nomor: 2, soal: "Kabar kembali datang dari John Wick 4 setelah mulai produksi pada Juni lalu. Kali ini aktor yang menyulih suara Surtur dalam Thor: Ragnarok, Clancy Brown, bergabung dengan John Wick 4. Sutradara Chad Stahelski mengaku senang dengan keterlibatan Brown dalam film yang ia garap. Bahkan ia mengaku sudah menjadi penggemar aktor berusia 62 tahun itu sejak lama. \n\nKata ganti 'itu' pada tulisan bercetak tebal dalam berita John Wick 4 mengacu pada ...", pilihan: ["A. John Wick 4", "B. Clancy Brown", "C. Donnie Yen", "D. Aktor asal Hong Kong"], kunci: "B" },
+  { bagian: "Kemampuan Verbal", nomor: 2, soal: "Kabar kembali datang dari John Wick 4 setelah mulai produksi pada Juni lalu. Kali ini aktor yang menyulih suara Surtur dalam Thor: Ragnarok, Clancy Brown, bergabung dengan John Wick 4. Sutradara Chad Stahelski mengaku senang dengan keterlibatan Brown dalam film yang ia garap. Bahkan ia mengaku sudah menjadi penggemar aktor berusia 62 tahun <strong>itu<strong> sejak lama. \n\nKata ganti 'itu' pada tulisan bercetak tebal dalam berita John Wick 4 mengacu pada ...", pilihan: ["A. John Wick 4", "B. Clancy Brown", "C. Donnie Yen", "D. Aktor asal Hong Kong"], kunci: "B" },
   { bagian: "Kemampuan Verbal", nomor: 3, soal: "Penulisan partikel /per/ berikut ini yang tepat adalah ...", pilihan: ["A. Persekian menit", "B. Perahu nelayan", "C. Per akaran tumbuhan", "D. Per satu detik"], kunci: "D" },
   { bagian: "Kemampuan Verbal", nomor: 4, soal: "WAHANA — Sinonim?", pilihan: ["A. Sarana", "B. Ide", "C. Dunia", "D. Planet"], kunci: "A" },
   { bagian: "Kemampuan Verbal", nomor: 5, soal: "DOGMA — Sinonim?", pilihan: ["A. Agama", "B. Ideologi", "C. Ajaran", "D. Keyakinan", "E. Kendaraan"], kunci: "D" },
-  { bagian: "Kemampuan Verbal", nomor: 6, soal: "Perubahan iklim berpotensi pada hilangnya sepertiga pantai pasir di planet ini. Menurut jurnal Nature Change, pengurangan Climate penggunaan bahan bakar fosil tetap tidak menghilangkan kemungkinan musnahnya sepertiga pantai berpasir di dunia.\n\n Penulisan kata ganti -nya pada kata bercetak tebal 'musnahnya' dalam teks perubahan iklim mengacu pada ...", pilihan: ["A. pantai berpasir", "B. Nature Climate Change", "C. perubahan iklim", "D. garis tepi pantai", "E. bahan bakar fosil"], kunci: "A" },
+  { bagian: "Kemampuan Verbal", nomor: 6, soal: "Perubahan iklim berpotensi pada hilangnya sepertiga pantai pasir di planet ini. Menurut jurnal Nature Change, pengurangan Climate penggunaan bahan bakar fosil tetap tidak menghilangkan kemungkinan <strong>musnahnya<strong> sepertiga pantai berpasir di dunia.\n\n Penulisan kata ganti -nya pada kata bercetak tebal 'musnahnya' dalam teks perubahan iklim mengacu pada ...", pilihan: ["A. pantai berpasir", "B. Nature Climate Change", "C. perubahan iklim", "D. garis tepi pantai", "E. bahan bakar fosil"], kunci: "A" },
   { bagian: "Kemampuan Verbal", nomor: 7, soal: "Berikut ini pernyataan yang benar mengenai gabungan kata adalah ...", pilihan: ["A. Gabungan kata yang merupakan istilah lazim atau kata majemuk ditulis serangkai.", "B. Gabungan kata yang menimbulkan salah pengertian ditulis menggunakan tanda hubung (-). Contoh: anak-istri pejabat", "C. Gabungan kata ditulis serangkai dengan catatan mendapatkan awalan.", "D. Gabungan kata yang sudah padu tidak perlu ditulis serangkai.", "E. Gabungan kata ditulis terpisah apabila terdiri dari bentuk terikat dan kata dasar."], kunci: "A" },
   { bagian: "Kemampuan Verbal", nomor: 8, soal: "Manakah pembentukan kata yang tepat dalam kalimat berikut?", pilihan: ["A. Tidak ada yang lebih memesona selain keberhasilan siswa", "B. Penerapan kurikulum baru mempengaruhi kinerja guru", "C. Kita jangan hanya memerhatikan bagaimana guru bekerja", "D. Penggunaan smartphone dapat memer-mudah manusia dalam berkomunikasi.", "E. Apakah semua kurikulum mampu mengubah dunia pendidikan?"], kunci: "E" },
   { bagian: "Kemampuan Verbal", nomor: 9, soal: "Kata ulang bermakna 'paling' terdapat pada kalimat ...", pilihan: ["A. Pemain-pemain sepakbola itu berkumpul di rumahnya.", "B. Mereka berusaha belajar sebaik-baiknya", "C. Ia hanya membaca buku-buku LKS", "D. Dia mendengarkan musik sambil tidur-tiduran", "E. Adi menggebu-gebu ingin masuk perwira."], kunci: "B" },
@@ -264,9 +264,9 @@ const WARNA_BAGIAN = {
 };
 
 const GOOGLE_SCRIPT_URL_TPB =
-  "https://script.google.com/macros/s/AKfycbwBsRf459Bi7Rc4kzK-4OrGGPlscNILBo6G-nFgDFvBP2jvJ8kq2r2LrLnbtIen_ma8CQ/exec";
+  "https://script.google.com/macros/s/AKfycbzqtZ6mqPH-iRWx9z2-0vxafQF9cSLnYwFsdtO9IMuY9SeWtYIE8zsDIPay02LkMGOI3g/exec";
 const GOOGLE_SCRIPT_URL_TPA =
-  "https://script.google.com/macros/s/AKfycbwBsRf459Bi7Rc4kzK-4OrGGPlscNILBo6G-nFgDFvBP2jvJ8kq2r2LrLnbtIen_ma8CQ/exec";
+  "https://script.google.com/macros/s/AKfycbzqtZ6mqPH-iRWx9z2-0vxafQF9cSLnYwFsdtO9IMuY9SeWtYIE8zsDIPay02LkMGOI3g/exec";
 
 function formatWaktu(secs) {
   const m = Math.floor(secs / 60).toString().padStart(2, "0");
@@ -275,7 +275,7 @@ function formatWaktu(secs) {
 }
 
 // Bagian yang tidak dihitung benar/salah
-const BAGIAN_TANPA_KUNCI = ["Kepribadian & Minat Bakat", "Minat Bakat"];
+const BAGIAN_TANPA_KUNCI = ["Minat Bakat"]; // Kepribadian sudah dinilai berdasarkan kunci
 
 function hitungSkor(soalList, jawabanObj) {
   // Hitung total (exclude bagian tanpa kunci)
@@ -332,6 +332,7 @@ export default function UjianOnline() {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const timerRef = useRef(null);
+  const soalTopRef = useRef(null);
   const submitDoneRef = useRef(false);
   const pelanggaranRef = useRef(0);
   const jawabanSesi1Ref = useRef({});
@@ -372,9 +373,12 @@ export default function UjianOnline() {
       logis_benar: skorBagian["Penalaran Logis"]?.benar ?? "-",
       logis_total: skorBagian["Penalaran Logis"]?.total ?? 0,
       logis_persen: skorBagian["Penalaran Logis"]?.persen ?? "-",
-      // Kepribadian (tidak dinilai, simpan jawaban mentah)
-      kepribadian_dijawab: skorBagian["Kepribadian & Minat Bakat"]?.dijawab ?? 0,
+      // Kepribadian (dinilai berdasarkan kunci)
+      kepribadian_benar: skorBagian["Kepribadian & Minat Bakat"]?.benar ?? 0,
       kepribadian_total: skorBagian["Kepribadian & Minat Bakat"]?.total ?? 0,
+      kepribadian_persen: skorBagian["Kepribadian & Minat Bakat"]?.persen ?? 0,
+      kepribadian_dijawab: skorBagian["Kepribadian & Minat Bakat"]?.benar !== undefined
+        ? skorBagian["Kepribadian & Minat Bakat"].total : 0,
       kepribadian_jawaban: SOAL_TPB.filter(s => s.bagian === "Kepribadian & Minat Bakat")
         .map(s => jawabanSesi1Ref.current[SOAL_TPB.indexOf(s)] || "-").join("|"),
       // Minat Bakat 40 soal (tidak dinilai, hitung profil dominan di Apps Script)
@@ -523,6 +527,12 @@ export default function UjianOnline() {
     setSesiAktif(2);
     document.documentElement.requestFullscreen().catch(() => {});
     setTahap("pengerjaanSesi2");
+  };
+
+  const scrollKeAtas = () => {
+    setTimeout(() => {
+      soalTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
   };
 
   const SOAL_AKTIF = sesiAktif === 1 ? SOAL_TPB : SOAL_TPA;
@@ -735,7 +745,7 @@ export default function UjianOnline() {
           const dijawabB = soalB.filter((s, idx) => JAWABAN_AKTIF[SOAL_AKTIF.findIndex((x) => x === s)] !== undefined).length;
           const aktif = bagianAktif === i;
           return (
-            <button key={b} onClick={() => setBagianAktif(i)} style={{ padding: "8px 14px", borderRadius: 10, border: aktif ? "2px solid #1a1a2e" : "1.5px solid #ddd", background: aktif ? "#1a1a2e" : "#fff", color: aktif ? "#fff" : "#333", fontWeight: aktif ? 700 : 400, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
+            <button key={b} onClick={() => { setBagianAktif(i); scrollKeAtas(); }} style={{ padding: "8px 14px", borderRadius: 10, border: aktif ? "2px solid #1a1a2e" : "1.5px solid #ddd", background: aktif ? "#1a1a2e" : "#fff", color: aktif ? "#fff" : "#333", fontWeight: aktif ? 700 : 400, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
               {b} ({dijawabB}/{soalB.length})
             </button>
           );
@@ -743,6 +753,7 @@ export default function UjianOnline() {
       </div>
       {/* Soal */}
       <div style={{ padding: "12px 16px", maxWidth: 720, margin: "0 auto" }}>
+        <div ref={soalTopRef} />
         {soalBagian.map(({ globalIdx, ...s }) => {
           const dipilih = JAWABAN_AKTIF[globalIdx];
           const warna = WARNA_BAGIAN[s.bagian] || { bg: "#f5f5f5", accent: "#333", light: "#eee" };
@@ -780,9 +791,9 @@ export default function UjianOnline() {
         })}
         {/* Navigasi & Submit */}
         <div style={{ display: "flex", gap: 10, marginTop: 8, marginBottom: 32 }}>
-          {bagianAktif > 0 && <button onClick={() => setBagianAktif((p) => p - 1)} style={S.btnSec}>← Sebelumnya</button>}
+          {bagianAktif > 0 && <button onClick={() => { setBagianAktif((p) => p - 1); scrollKeAtas(); }} style={S.btnSec}>← Sebelumnya</button>}
           {bagianAktif < BAGIAN_LIST_AKTIF.length - 1
-            ? <button onClick={() => setBagianAktif((p) => p + 1)} style={{ ...S.btnPrimary, flex: 1 }}>Bagian Berikutnya →</button>
+            ? <button onClick={() => { setBagianAktif((p) => p + 1); scrollKeAtas(); }} style={{ ...S.btnPrimary, flex: 1 }}>Bagian Berikutnya →</button>
             : <button onClick={() => setKonfirmasi(true)} style={{ ...S.btnPrimary, flex: 1, background: sesiAktif === 1 ? "linear-gradient(90deg,#27ae60,#2ecc71)" : "linear-gradient(90deg,#e74c3c,#c0392b)" }}>
                 {sesiAktif === 1 ? "✅ Selesai Sesi 1" : "📤 Kumpulkan Jawaban Sesi 2"}
               </button>
