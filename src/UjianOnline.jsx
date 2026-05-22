@@ -9,11 +9,11 @@ const MAX_PELANGGARAN = 3;
 const SOAL_TPB = [
   // BAGIAN I: KEMAMPUAN VERBAL
   { bagian: "Kemampuan Verbal", nomor: 1, soal: "Penulisan partikel dalam kalimat berikut ini yang benar adalah ..", pilihan: ["A. Apa kah aku boleh memakan buahmu?", "B. Murid memasuki ruangan satu persatu", "C. Apa pun yang dia inginkan selalu terpenuhi.", "D. Ada pun penyebab kemacetan itu belum diketahui."], kunci: "C" },
-  { bagian: "Kemampuan Verbal", nomor: 2, soal: "Kabar kembali datang dari John Wick 4 setelah mulai produksi pada Juni lalu. Kali ini aktor yang menyulih suara Surtur dalam Thor: Ragnarok, Clancy Brown, bergabung dengan John Wick 4. Sutradara Chad Stahelski mengaku senang dengan keterlibatan Brown dalam film yang ia garap. Bahkan ia mengaku sudah menjadi penggemar aktor berusia 62 tahun 'itu' sejak lama. \n\nKata ganti 'itu' pada tulisan dalam berita John Wick 4 mengacu pada ...", pilihan: ["A. John Wick 4", "B. Clancy Brown", "C. Donnie Yen", "D. Aktor asal Hong Kong"], kunci: "B" },
+  { bagian: "Kemampuan Verbal", nomor: 2, soal: "Kabar kembali datang dari John Wick 4 setelah mulai produksi pada Juni lalu. Kali ini aktor yang menyulih suara Surtur dalam Thor: Ragnarok, Clancy Brown, bergabung dengan John Wick 4. Sutradara Chad Stahelski mengaku senang dengan keterlibatan Brown dalam film yang ia garap. Bahkan ia mengaku sudah menjadi penggemar aktor berusia 62 tahun 'itu' sejak lama. \n\nKata ganti 'itu' pada tulisan bercetak tebal dalam berita John Wick 4 mengacu pada ...", pilihan: ["A. John Wick 4", "B. Clancy Brown", "C. Donnie Yen", "D. Aktor asal Hong Kong"], kunci: "B" },
   { bagian: "Kemampuan Verbal", nomor: 3, soal: "Penulisan partikel /per/ berikut ini yang tepat adalah ...", pilihan: ["A. Persekian menit", "B. Perahu nelayan", "C. Per akaran tumbuhan", "D. Per satu detik"], kunci: "D" },
   { bagian: "Kemampuan Verbal", nomor: 4, soal: "WAHANA — Sinonim?", pilihan: ["A. Sarana", "B. Ide", "C. Dunia", "D. Planet"], kunci: "A" },
   { bagian: "Kemampuan Verbal", nomor: 5, soal: "DOGMA — Sinonim?", pilihan: ["A. Agama", "B. Ideologi", "C. Ajaran", "D. Keyakinan", "E. Kendaraan"], kunci: "D" },
-  { bagian: "Kemampuan Verbal", nomor: 6, soal: "Perubahan iklim berpotensi pada hilangnya sepertiga pantai pasir di planet ini. Menurut jurnal Nature Change, pengurangan Climate penggunaan bahan bakar fosil tetap tidak menghilangkan kemungkinan 'musnahnya' sepertiga pantai berpasir di dunia.\n\n Penulisan kata ganti -nya pada kata 'musnahnya' dalam teks perubahan iklim mengacu pada ...", pilihan: ["A. pantai berpasir", "B. Nature Climate Change", "C. perubahan iklim", "D. garis tepi pantai", "E. bahan bakar fosil"], kunci: "A" },
+  { bagian: "Kemampuan Verbal", nomor: 6, soal: "Perubahan iklim berpotensi pada hilangnya sepertiga pantai pasir di planet ini. Menurut jurnal Nature Change, pengurangan Climate penggunaan bahan bakar fosil tetap tidak menghilangkan kemungkinan 'musnahnya' sepertiga pantai berpasir di dunia.\n\n Penulisan kata ganti -nya pada kata bercetak tebal 'musnahnya' dalam teks perubahan iklim mengacu pada ...", pilihan: ["A. pantai berpasir", "B. Nature Climate Change", "C. perubahan iklim", "D. garis tepi pantai", "E. bahan bakar fosil"], kunci: "A" },
   { bagian: "Kemampuan Verbal", nomor: 7, soal: "Berikut ini pernyataan yang benar mengenai gabungan kata adalah ...", pilihan: ["A. Gabungan kata yang merupakan istilah lazim atau kata majemuk ditulis serangkai.", "B. Gabungan kata yang menimbulkan salah pengertian ditulis menggunakan tanda hubung (-). Contoh: anak-istri pejabat", "C. Gabungan kata ditulis serangkai dengan catatan mendapatkan awalan.", "D. Gabungan kata yang sudah padu tidak perlu ditulis serangkai.", "E. Gabungan kata ditulis terpisah apabila terdiri dari bentuk terikat dan kata dasar."], kunci: "A" },
   { bagian: "Kemampuan Verbal", nomor: 8, soal: "Manakah pembentukan kata yang tepat dalam kalimat berikut?", pilihan: ["A. Tidak ada yang lebih memesona selain keberhasilan siswa", "B. Penerapan kurikulum baru mempengaruhi kinerja guru", "C. Kita jangan hanya memerhatikan bagaimana guru bekerja", "D. Penggunaan smartphone dapat memer-mudah manusia dalam berkomunikasi.", "E. Apakah semua kurikulum mampu mengubah dunia pendidikan?"], kunci: "E" },
   { bagian: "Kemampuan Verbal", nomor: 9, soal: "Kata ulang bermakna 'paling' terdapat pada kalimat ...", pilihan: ["A. Pemain-pemain sepakbola itu berkumpul di rumahnya.", "B. Mereka berusaha belajar sebaik-baiknya", "C. Ia hanya membaca buku-buku LKS", "D. Dia mendengarkan musik sambil tidur-tiduran", "E. Adi menggebu-gebu ingin masuk perwira."], kunci: "B" },
@@ -348,6 +348,24 @@ export default function UjianOnline() {
   useEffect(() => { tahapRef.current = tahap; }, [tahap]);
 
   // ── Kirim Sesi 1 ke Google Sheet ──
+  // ── Retry otomatis untuk antisipasi GAS overload (500 user serentak) ──
+  const kirimDenganRetry = async (url, payload, maxRetry = 5) => {
+    for (let i = 0; i < maxRetry; i++) {
+      try {
+        await fetch(url, {
+          method: "POST", mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        return; // berhasil, keluar loop
+      } catch (_) {
+        if (i < maxRetry - 1) {
+          await new Promise(r => setTimeout(r, 1000 * (i + 1))); // tunggu 1s, 2s, 3s, 4s
+        }
+      }
+    }
+  };
+
   const kirimSesi1 = useCallback(async (alasan = "Normal") => {
     if (submitDoneRef.current) return;
     submitDoneRef.current = true;
@@ -397,7 +415,7 @@ export default function UjianOnline() {
       keterangan: alasan,
     };
     try {
-      await fetch(GOOGLE_SCRIPT_URL_TPB, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      await kirimDenganRetry(GOOGLE_SCRIPT_URL_TPB, payload);
     } catch (_) {}
 
     // Jika diskualifikasi di Sesi 1, kirim juga data TPA kosong agar tercatat di kedua sheet
@@ -416,7 +434,7 @@ export default function UjianOnline() {
         keterangan: "TIDAK MENGIKUTI — " + alasan,
       };
       try {
-        await fetch(GOOGLE_SCRIPT_URL_TPA, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payloadTPAKosong) });
+        await kirimDenganRetry(GOOGLE_SCRIPT_URL_TPA, payloadTPAKosong);
       } catch (_) {}
     }
 
@@ -453,7 +471,7 @@ export default function UjianOnline() {
       keterangan: alasan,
     };
     try {
-      await fetch(GOOGLE_SCRIPT_URL_TPA, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      await kirimDenganRetry(GOOGLE_SCRIPT_URL_TPA, payload);
     } catch (_) {}
     localStorage.setItem(`ujian_submitted_${id.nis}`, JSON.stringify({ nama: id.nama, waktu: new Date().toLocaleString("id-ID") }));
     setLoading(false);
